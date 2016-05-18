@@ -1,8 +1,8 @@
 MODS
 ======
-MODS: Fast and Robust Method for Two-View Matching
+MODS: Fast and Robust Method for Two-View Matching which contains many feature detectors, affine region detectors and descriptors.
 
-Clone from http://cmp.felk.cvut.cz/wbs/
+From http://cmp.felk.cvut.cz/wbs/
 
 Very strong algorithm for two-view matching problem under large variations (e.g. poses or illuminations).
 
