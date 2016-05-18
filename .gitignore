@@ -1,0 +1,10 @@
+*.o
+*.os
+*.so
+*.log
+run_mods
+
+build
+data
+.*
+!.gitignore

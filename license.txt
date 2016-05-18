@@ -1,0 +1,4 @@
+You are free to use this software for academic research purposes. 
+For other uses, please, contact the authors (ducha.aiki@gmail.com).
+
+Note that the included SIFT descriptor is subject to US Patent 6,711,293.
