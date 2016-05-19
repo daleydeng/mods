@@ -5,6 +5,8 @@
 #include <omp.h>
 #endif
 
+using namespace std;
+
 namespace mods {
 
 CorrespondenceBank::CorrespondenceBank()
@@ -234,6 +236,31 @@ void CorrespondenceBank::AddCorrespondencesToList(TentativeCorrespListExt& BaseC
     BaseCorrs.TCList.push_back(*ptr);
 }
 
+template <typename T>
+bool is_in_map(const string & q, const map<string, T> &m, T *v) {
+  if (m.find(q) != m.end()) {
+    *v = m.at(q);
+    return true;
+  }
+  return false;
+}
+
+template <typename param_t>
+void match_img_rep(const AffineRegionVector &queries, const AffineRegionVector &trains, TentativeCorrespListExt *tents, const MatchPars &par, const param_t &sv_par, const string &curr_desc) {
+  MatchPars match_par = par;
+  double v;
+  if (is_in_map(curr_desc, sv_par.FGINNThreshold, &v)) {
+    match_par.currMatchRatio = v;
+    if (v > 0)
+      MatchFlannFGINN(queries, trains, *tents, match_par);
+  }
+  if (is_in_map(curr_desc, sv_par.DistanceThreshold, &v)) {
+    match_par.matchDistanceThreshold = v;
+    if (v > 0)
+      MatchFLANNDistance(queries, trains, *tents, match_par);
+  }
+}
+
 int CorrespondenceBank::MatchImgReps(ImageRepresentation &imgrep1, ImageRepresentation &imgrep2,
                                      IterationViewsynthesisParam &synth_par, const WhatToMatch WhatToMatchNow,
                                      const MatchPars &par, const DescriptorsParameters &desc_pars)
@@ -262,26 +289,7 @@ int CorrespondenceBank::MatchImgReps(ImageRepresentation &imgrep1, ImageRepresen
           AddRegionsToList(queries,tempRegs);
         }
       //Parameters
-      MatchPars current_match_par = par;
-      std::map <std::string, double>::const_iterator thresh_it;
-      thresh_it = par.FGINNThreshold.find(curr_desc);
-      if ( thresh_it != par.FGINNThreshold.end())
-        current_match_par.currMatchRatio = thresh_it->second;
-      else
-        current_match_par.currMatchRatio=0;
-
-      thresh_it = par.DistanceThreshold.find(curr_desc);
-      if ( thresh_it != par.DistanceThreshold.end())
-        current_match_par.matchDistanceThreshold = thresh_it->second;
-      else
-        current_match_par.matchDistanceThreshold=0;
-
-
-      if (current_match_par.currMatchRatio > 0)
-        MatchFlannFGINN(queries,trains,current_tents,current_match_par);
-      if (current_match_par.matchDistanceThreshold > 0)
-        MatchFLANNDistance(queries,trains,current_tents,current_match_par);
-
+      match_img_rep(queries, trains, &current_tents, par, par, curr_desc);
       AddCorrespondences(current_tents,"Group",curr_desc);
 
     }
@@ -312,29 +320,10 @@ int CorrespondenceBank::MatchImgReps(ImageRepresentation &imgrep1, ImageRepresen
               tempRegs=imgrep1.GetAffineRegionVector(curr_desc,curr_det);
               AddRegionsToList(queries,tempRegs);
 
-              MatchPars current_match_par = par;
-              std::map <std::string, double>::const_iterator thresh_it;
-
-              thresh_it = current_VS_params.FGINNThreshold.find(curr_desc);
-              if ( thresh_it != current_VS_params.FGINNThreshold.end())
-                current_match_par.currMatchRatio = thresh_it->second;
-              else
-                current_match_par.currMatchRatio=0;
-
-              thresh_it = current_VS_params.DistanceThreshold.find(curr_desc);
-              if ( thresh_it != current_VS_params.DistanceThreshold.end())
-                current_match_par.matchDistanceThreshold = thresh_it->second;
-              else
-                current_match_par.matchDistanceThreshold=0;
+              match_img_rep(queries, trains, &current_tents, par, current_VS_params, curr_desc);
 
               std::cerr << "Matching det = " << curr_det << ", desc = " << curr_desc << std::endl;
               std::cerr << "num_descs1 = " << queries.size() << " num_descs2 = " << trains.size() << std::endl;
-              if (current_match_par.currMatchRatio > 0)  {
-                  MatchFlannFGINN(queries,trains,current_tents,current_match_par);
-                }
-              if (current_match_par.matchDistanceThreshold > 0) {
-                  MatchFLANNDistance(queries,trains,current_tents,current_match_par);
-                }
               AddCorrespondences(current_tents,curr_det,curr_desc);
             }
         }

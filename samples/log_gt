@@ -1,3 +1,4 @@
+Maximum threads can be used: 1
 View synthesis, detection and description...
 Iteration 0
 ORB: 1 synthesis will be done.
@@ -10,9 +11,9 @@ Testing for degeneracy (4)
 (20) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
 Testing for degeneracy (6)
 (4813) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
-Number of hypotheses/models: 100000/9477
-Number of samples rejected by pre-validation: 90523
-Number of models rejected by pre-validation: 6697
+Number of hypotheses/models: 100000/9452
+Number of samples rejected by pre-validation: 90548
+Number of models rejected by pre-validation: 6672
 Number of models rejected by transfer error check: 7
 Number of verifications per model: 360
 Max inliers/total points: 6/360
@@ -21,22 +22,22 @@ Max inliers/total points: 6/360
 Iteration 1
 ORB: 6 synthesis will be done.
 Matching det = ORB, desc = ORB
-num_descs1 = 1302 num_descs2 = 2252
-1227 tentatives found.
+num_descs1 = 1305 num_descs2 = 2252
+1229 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-1188 unique tentatives left
+1189 unique tentatives left
 Testing for degeneracy (4)
-(2561) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
+(5561) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
 Testing for degeneracy (5)
-(4359) Performing LO. Inlier count before: 5. After: 5, lo-inlier count: 5
+(18506) Performing LO. Inlier count before: 5. After: 5, lo-inlier count: 5
 Testing for degeneracy (6)
-(29585) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
-Number of hypotheses/models: 100000/8710
-Number of samples rejected by pre-validation: 91290
-Number of models rejected by pre-validation: 5500
-Number of models rejected by transfer error check: 103
-Number of verifications per model: 1188
-Max inliers/total points: 6/1188
+(49104) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
+Number of hypotheses/models: 100000/8974
+Number of samples rejected by pre-validation: 91026
+Number of models rejected by pre-validation: 5729
+Number of models rejected by transfer error check: 204
+Number of verifications per model: 1189
+Max inliers/total points: 6/1189
 0 out of 6 left after H-LAF-check
 0 RANSAC correspondences got
 Iteration 2
@@ -44,31 +45,31 @@ MSER: 3 synthesis will be done.
 Discarding ORB features
 Matching det = MSER, desc = RootSIFT
 num_descs1 = 4006 num_descs2 = 6737
-19 tentatives found.
+21 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-16 unique tentatives left
-Number of hypotheses/models: 1000/190
-Number of samples rejected by pre-validation: 810
-Number of models rejected by pre-validation: 101
-Number of models rejected by transfer error check: 89
-Number of verifications per model: 16
-Max inliers/total points: 0/16
+17 unique tentatives left
+Number of hypotheses/models: 1000/133
+Number of samples rejected by pre-validation: 867
+Number of models rejected by pre-validation: 60
+Number of models rejected by transfer error check: 73
+Number of verifications per model: 17
+Max inliers/total points: 0/17
 0 RANSAC correspondences got
 Iteration 3
 HessianAffine: 1 synthesis will be done.
 Matching det = HessianAffine, desc = RootSIFT
-num_descs1 = 4481 num_descs2 = 10348
-^[[CMatching det = HessianAffine, desc = HalfRootSIFT
-num_descs1 = 4817 num_descs2 = 11636
-126 tentatives found.
+num_descs1 = 4480 num_descs2 = 10350
+Matching det = HessianAffine, desc = HalfRootSIFT
+num_descs1 = 4817 num_descs2 = 11643
+130 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-111 unique tentatives left
-Number of hypotheses/models: 100000/10320
-Number of samples rejected by pre-validation: 89680
-Number of models rejected by pre-validation: 5260
-Number of models rejected by transfer error check: 5060
-Number of verifications per model: 111
-Max inliers/total points: 0/111
+112 unique tentatives left
+Number of hypotheses/models: 100000/10635
+Number of samples rejected by pre-validation: 89365
+Number of models rejected by pre-validation: 6570
+Number of models rejected by transfer error check: 4065
+Number of verifications per model: 112
+Max inliers/total points: 0/112
 0 RANSAC correspondences got
 Iteration 4
 HessianAffine: 10 synthesis will be done.
@@ -78,92 +79,86 @@ num_descs1 = 6646 num_descs2 = 12614
 Matching det = MSER, desc = HalfRootSIFT
 num_descs1 = 7740 num_descs2 = 15017
 Matching det = HessianAffine, desc = RootSIFT
-num_descs1 = 12058 num_descs2 = 24514
+num_descs1 = 12041 num_descs2 = 24519
 Matching det = HessianAffine, desc = HalfRootSIFT
-num_descs1 = 13629 num_descs2 = 29393
-385 tentatives found.
+num_descs1 = 13631 num_descs2 = 29416
+383 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-354 unique tentatives left
-Testing for degeneracy (6)
-(1450) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
+345 unique tentatives left
+Testing for degeneracy (4)
+(444) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
 Testing for degeneracy (7)
-(36627) Performing LO. Inlier count before: 7. After: 7, lo-inlier count: 7
-Testing for degeneracy (8)
-(57572) Performing LO. Inlier count before: 8. After: 8, lo-inlier count: 8
-Number of hypotheses/models: 100000/10096
-Number of samples rejected by pre-validation: 89904
-Number of models rejected by pre-validation: 5569
-Number of models rejected by transfer error check: 74
-Number of verifications per model: 354
-Max inliers/total points: 8/354
-8 out of 8 left after H-LAF-check
-8 RANSAC correspondences got
+(1754) Performing LO. Inlier count before: 7. After: 7, lo-inlier count: 7
+Number of hypotheses/models: 100000/9865
+Number of samples rejected by pre-validation: 90135
+Number of models rejected by pre-validation: 5637
+Number of models rejected by transfer error check: 24
+Number of verifications per model: 345
+Max inliers/total points: 7/345
+0 out of 7 left after H-LAF-check
+0 RANSAC correspondences got
 Iteration 5
 HessianAffine: 20 synthesis will be done.
 Matching det = HessianAffine, desc = RootSIFT
-num_descs1 = 27343 num_descs2 = 49575
+num_descs1 = 27337 num_descs2 = 49563
 Matching det = HessianAffine, desc = HalfRootSIFT
-num_descs1 = 13629 num_descs2 = 29393
-299 tentatives found.
+num_descs1 = 13631 num_descs2 = 29416
+302 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-268 unique tentatives left
-Testing for degeneracy (4)
-(157) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
+280 unique tentatives left
+Testing for degeneracy (5)
+(104) Performing LO. Inlier count before: 5. After: 5, lo-inlier count: 5
 Testing for degeneracy (6)
-(322) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
+(1199) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
 Testing for degeneracy (7)
-(12284) Performing LO. Inlier count before: 7. After: 7, lo-inlier count: 7
-Testing for degeneracy (8)
-(12804) Performing LO. Inlier count before: 8. After: 8, lo-inlier count: 8
-Testing for degeneracy (10)
-(21492) Performing LO. Inlier count before: 10. After: 11, lo-inlier count: 11
-Number of hypotheses/models: 100000/12357
-Number of samples rejected by pre-validation: 87643
-Number of models rejected by pre-validation: 6626
-Number of models rejected by transfer error check: 11
-Number of verifications per model: 268
-Max inliers/total points: 11/268
-11 out of 11 left after H-LAF-check
-11 RANSAC correspondences got
+(1605) Performing LO. Inlier count before: 7. After: 7, lo-inlier count: 7
+Testing for degeneracy (9)
+(12308) Performing LO. Inlier count before: 9. After: 9, lo-inlier count: 9
+Number of hypotheses/models: 100000/12805
+Number of samples rejected by pre-validation: 87195
+Number of models rejected by pre-validation: 6775
+Number of models rejected by transfer error check: 8
+Number of verifications per model: 280
+Max inliers/total points: 9/280
+9 out of 9 left after H-LAF-check
+9 RANSAC correspondences got
 Iteration 6
 HessianAffine: 30 synthesis will be done.
 Matching det = HessianAffine, desc = RootSIFT
-num_descs1 = 50308 num_descs2 = 88918
+num_descs1 = 50319 num_descs2 = 88913
 Matching det = HessianAffine, desc = HalfRootSIFT
-num_descs1 = 40775 num_descs2 = 79106
-907 tentatives found.
+num_descs1 = 40805 num_descs2 = 79137
+926 tentatives found.
 Duplicate filtering before RANSAC with threshold = 2 pixels.
-811 unique tentatives left
+821 unique tentatives left
 Testing for degeneracy (4)
-(57) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
-Testing for degeneracy (5)
-(405) Performing LO. Inlier count before: 5. After: 5, lo-inlier count: 5
-Testing for degeneracy (7)
-(722) Performing LO. Inlier count before: 7. After: 7, lo-inlier count: 7
-Testing for degeneracy (8)
-(1061) Performing LO. Inlier count before: 8. After: 8, lo-inlier count: 8
-Testing for degeneracy (13)
-(3108) Performing LO. Inlier count before: 13. After: 20, lo-inlier count: 20
-Number of hypotheses/models: 100000/10878
-Number of samples rejected by pre-validation: 89122
-Number of models rejected by pre-validation: 6021
-Number of models rejected by transfer error check: 2
-Number of verifications per model: 811
-Max inliers/total points: 20/811
-20 out of 20 left after H-LAF-check
-20 RANSAC correspondences got
+(107) Performing LO. Inlier count before: 4. After: 4, lo-inlier count: 4
+Testing for degeneracy (6)
+(148) Performing LO. Inlier count before: 6. After: 6, lo-inlier count: 6
+Testing for degeneracy (9)
+(3069) Performing LO. Inlier count before: 9. After: 9, lo-inlier count: 9
+Testing for degeneracy (17)
+(21590) Performing LO. Inlier count before: 17. After: 23, lo-inlier count: 23
+Number of hypotheses/models: 100000/10394
+Number of samples rejected by pre-validation: 89606
+Number of models rejected by pre-validation: 6020
+Number of models rejected by transfer error check: 4
+Number of verifications per model: 821
+Max inliers/total points: 23/821
+23 out of 23 left after H-LAF-check
+23 RANSAC correspondences got
 Done in 7 iterations
 *********************
 Writing files... 
 Image1: regions descriptors | Image2: regions descriptors 
-34018 106771 | 64384 197907
+34052 106815 | 64423 197933
 
 True matches | unique tentatives
-20 | 811 | 2.47%  1st geom inc
+23 | 821 | 2.8%  1st geom inc
 
 Main matching | All Time: 
-63 | 63.3 seconds
+86.4 | 86.7 seconds
 Timings: (sec/%) 
 Synth|Detect|Orient|Desc|Match|RANSAC|MISC|Total 
-2.71 8.61 13.2 18.1 18.8 1.39 0.433 63.3
-4.28 13.6 20.9 28.6 29.8 2.2 0.684 100
+1.55 22 26.5 18.1 16.9 1.38 0.373 86.7
+1.78 25.4 30.5 20.9 19.4 1.59 0.43 100

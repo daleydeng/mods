@@ -31,6 +31,7 @@ inline long getMilliSecs()
 
 int main(int argc, char **argv)
 {
+  srand(1);
   if ((argc < Tmin))
     {
       std::cerr << " ************************************************************************** " << std::endl

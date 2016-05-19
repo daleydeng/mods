@@ -4,7 +4,6 @@
 
 const double k_usac_CheckCoef = 9.0;
 
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -16,37 +15,37 @@ const double k_usac_CheckCoef = 9.0;
 struct UsacResults {
   void reset() {
 
-    hyp_count_			     = 0;
-    model_count_		     = 0;
+    hyp_count_                       = 0;
+    model_count_                     = 0;
     rejected_sample_count_   = 0;
     rejected_model_count_    = 0;
     rejected_by_sym_check_count = 0;
     best_inlier_count_       = 0;
-    degen_inlier_count_		 = 0;
+    degen_inlier_count_          = 0;
     total_points_verified_   = 0;
     num_local_optimizations_ = 0;
-    total_runtime_			 = 0;
+    total_runtime_                       = 0;
     best_model_index = 0;
     inlier_flags_.clear();
     best_sample_.clear();
     degen_inlier_flags_.clear();
     degen_sample_.clear();
   }
-  unsigned int			  hyp_count_;
-  unsigned int			  model_count_;
-  unsigned int			  rejected_sample_count_;
-  unsigned int			  rejected_model_count_;
-  unsigned int			  total_points_verified_;
-  unsigned int			  num_local_optimizations_;
-  unsigned int			  best_inlier_count_;
+  unsigned int                    hyp_count_;
+  unsigned int                    model_count_;
+  unsigned int                    rejected_sample_count_;
+  unsigned int                    rejected_model_count_;
+  unsigned int                    total_points_verified_;
+  unsigned int                    num_local_optimizations_;
+  unsigned int                    best_inlier_count_;
   unsigned int rejected_by_sym_check_count;
   unsigned int best_model_index;
   std::vector<unsigned int> inlier_flags_;
   std::vector<unsigned int> best_sample_;
-  unsigned int			  degen_inlier_count_;
+  unsigned int                    degen_inlier_count_;
   std::vector<unsigned int> degen_inlier_flags_;
   std::vector<unsigned int> degen_sample_;
-  double					  total_runtime_;
+  double                                          total_runtime_;
 };
 
 template <class ProblemType>
@@ -55,7 +54,7 @@ class USAC
 public:
   // ------------------------------------------------------------------------
   //  initialization/main functions
-  USAC() {};
+        USAC() {};
   virtual ~USAC() {};
   void initParamsUSAC(const ConfigParams& cfg);
   void initDataUSAC(const ConfigParams& cfg);
@@ -66,33 +65,33 @@ protected:
   // ------------------------------------------------------------------------
   // pure virtual functions to be overridden in the derived class
   virtual inline unsigned int generateMinimalSampleModels() = 0;
-  virtual inline bool		    generateRefinedModel(std::vector<unsigned int>& sample, const unsigned int numPoints,
+  virtual inline bool               generateRefinedModel(std::vector<unsigned int>& sample, const unsigned int numPoints,
                                                          bool weighted, double* weights) = 0;
-  virtual inline bool		    validateSample() = 0;
-  virtual inline bool		    validateModel(unsigned int modelIndex) = 0;
-  virtual inline bool		    evaluateModel(unsigned int modelIndex, unsigned int* numInliers, unsigned int* numPointsTested) = 0;
-  virtual inline void		    testSolutionDegeneracy(bool* degenerateModel, bool* upgradeModel) = 0;
+  virtual inline bool               validateSample() = 0;
+  virtual inline bool               validateModel(unsigned int modelIndex) = 0;
+  virtual inline bool               evaluateModel(unsigned int modelIndex, unsigned int* numInliers, unsigned int* numPointsTested) = 0;
+  virtual inline void               testSolutionDegeneracy(bool* degenerateModel, bool* upgradeModel) = 0;
   virtual inline unsigned int upgradeDegenerateModel() = 0;
-  virtual inline void		    findWeights(unsigned int modelIndex, const std::vector<unsigned int>& inliers,
+  virtual inline void               findWeights(unsigned int modelIndex, const std::vector<unsigned int>& inliers,
                                                 unsigned int numInliers, double* weights) = 0;
-  virtual inline void		    storeModel(unsigned int modelIndex, unsigned int numInliers) = 0;
+  virtual inline void               storeModel(unsigned int modelIndex, unsigned int numInliers) = 0;
 
 
   // ------------------------------------------------------------------------
   // USAC input parameters
 protected:
   // common parameters
-  double			usac_conf_threshold_;
+  double                        usac_conf_threshold_;
   unsigned int    usac_min_sample_size_;
-  double			usac_inlier_threshold_;
-  unsigned int	usac_max_hypotheses_;
-  unsigned int	usac_max_solns_per_sample_;
-  bool			usac_prevalidate_sample_;
-  bool			usac_prevalidate_model_;
-  bool			usac_test_degeneracy_;
-  unsigned int	usac_num_data_points_;
-  USACConfig::RandomSamplingMethod	   usac_sampling_method_;
-  USACConfig::VerifMethod				   usac_verif_method_;
+  double                        usac_inlier_threshold_;
+  unsigned int  usac_max_hypotheses_;
+  unsigned int  usac_max_solns_per_sample_;
+  bool                  usac_prevalidate_sample_;
+  bool                  usac_prevalidate_model_;
+  bool                  usac_test_degeneracy_;
+  unsigned int  usac_num_data_points_;
+  USACConfig::RandomSamplingMethod         usac_sampling_method_;
+  USACConfig::VerifMethod                                  usac_verif_method_;
   USACConfig::LocalOptimizationMethod    usac_local_opt_method_;
   USACConfig::GeometricErrorFunction usac_error_function_;
 
@@ -101,7 +100,7 @@ protected:
   // PROSAC parameters
   unsigned int  prosac_growth_max_samples_;
   double        prosac_beta_;
-  double		  prosac_non_rand_conf_;
+  double                  prosac_non_rand_conf_;
   unsigned int  prosac_min_stop_length_;
   std::vector<int>   prosac_sorted_point_indices_;
 
@@ -123,21 +122,21 @@ protected:
   // common
   std::vector<unsigned int>     min_sample_;
   std::vector<double>           errs_;
-  std::vector<double>::iterator err_ptr_[3];	// err_ptr_[0] points to the temporary error value storage
+  std::vector<double>::iterator err_ptr_[3];    // err_ptr_[0] points to the temporary error value storage
   // err_ptr_[1] points to the error values for the best solution
 
   // PROSAC
-  unsigned int			  subset_size_prosac_;
-  unsigned int			  largest_size_prosac_;
-  unsigned int			  stop_len_prosac_;
+  unsigned int                    subset_size_prosac_;
+  unsigned int                    largest_size_prosac_;
+  unsigned int                    stop_len_prosac_;
   std::vector<unsigned int> growth_function_prosac_;
   std::vector<unsigned int> non_random_inliers_prosac_;
   std::vector<unsigned int> maximality_samples_prosac_;
 
   // SPRT
-  double					  decision_threshold_sprt_;
-  std::vector<unsigned int> evaluation_pool_;	 // randomized evaluation - holds ordering of points
-  unsigned int			  eval_pool_index_;	 // index to the first point to be verified
+  double                                          decision_threshold_sprt_;
+  std::vector<unsigned int> evaluation_pool_;    // randomized evaluation - holds ordering of points
+  unsigned int                    eval_pool_index_;      // index to the first point to be verified
   struct TestHistorySPRT
   {
     double epsilon_, delta_, A_;
@@ -206,8 +205,8 @@ protected:
 
 
 // ============================================================================================
-// initParamsUSAC: initializes USAC 
-// this function is called once to initialize the basic USAC parameters 
+// initParamsUSAC: initializes USAC
+// this function is called once to initialize the basic USAC parameters
 // all problem specific/data-specific initialization is done using initDataUSAC()
 // ============================================================================================
 template <class ProblemType>
@@ -215,15 +214,15 @@ void USAC<ProblemType>::initParamsUSAC(const ConfigParams& cfg)
 {
   // store common parameters
   usac_conf_threshold_        = cfg.common.confThreshold;
-  usac_min_sample_size_		= cfg.common.minSampleSize;
-  usac_inlier_threshold_		= cfg.common.inlierThreshold;
-  usac_max_hypotheses_		= cfg.common.maxHypotheses;
-  usac_max_solns_per_sample_	= cfg.common.maxSolutionsPerSample;
-  usac_prevalidate_sample_	= cfg.common.prevalidateSample;
-  usac_prevalidate_model_		= cfg.common.prevalidateModel;
-  usac_test_degeneracy_		= cfg.common.testDegeneracy;
-  usac_sampling_method_		= cfg.common.randomSamplingMethod;
-  usac_verif_method_			= cfg.common.verifMethod;
+  usac_min_sample_size_         = cfg.common.minSampleSize;
+  usac_inlier_threshold_                = cfg.common.inlierThreshold;
+  usac_max_hypotheses_          = cfg.common.maxHypotheses;
+  usac_max_solns_per_sample_    = cfg.common.maxSolutionsPerSample;
+  usac_prevalidate_sample_      = cfg.common.prevalidateSample;
+  usac_prevalidate_model_               = cfg.common.prevalidateModel;
+  usac_test_degeneracy_         = cfg.common.testDegeneracy;
+  usac_sampling_method_         = cfg.common.randomSamplingMethod;
+  usac_verif_method_                    = cfg.common.verifMethod;
   usac_local_opt_method_      = cfg.common.localOptMethod;
   usac_error_function_ =  cfg.common.geomErrFunc;
 
@@ -232,15 +231,15 @@ void USAC<ProblemType>::initParamsUSAC(const ConfigParams& cfg)
   if (usac_sampling_method_ == USACConfig::SAMP_PROSAC)
     {
       prosac_growth_max_samples_  = cfg.prosac.maxSamples;
-      prosac_beta_				= cfg.prosac.beta;
-      prosac_non_rand_conf_		= cfg.prosac.nonRandConf;
+      prosac_beta_                              = cfg.prosac.beta;
+      prosac_non_rand_conf_             = cfg.prosac.nonRandConf;
       prosac_min_stop_length_     = cfg.prosac.minStopLen;
     }
 
   // read in SPRT parameters if required
   if (usac_verif_method_ == USACConfig::VERIF_SPRT)
     {
-      sprt_tM_	   = cfg.sprt.tM;
+      sprt_tM_     = cfg.sprt.tM;
       sprt_mS_       = cfg.sprt.mS;
       sprt_delta_    = cfg.sprt.delta;
       sprt_epsilon_  = cfg.sprt.epsilon;
@@ -249,10 +248,10 @@ void USAC<ProblemType>::initParamsUSAC(const ConfigParams& cfg)
   // read in LO parameters if required
   if (usac_local_opt_method_ == USACConfig::LO_LOSAC)
     {
-      lo_inner_sample_size		   = cfg.losac.innerSampleSize;
+      lo_inner_sample_size                 = cfg.losac.innerSampleSize;
       lo_num_inner_ransac_reps_      = cfg.losac.innerRansacRepetitions;
       lo_threshold_multiplier_       = cfg.losac.thresholdMultiplier;
-      lo_num_iterative_steps_	       = cfg.losac.numStepsIterative;
+      lo_num_iterative_steps_          = cfg.losac.numStepsIterative;
     }
 
   min_sample_.clear(); min_sample_.resize(usac_min_sample_size_);
@@ -276,13 +275,13 @@ void USAC<ProblemType>::initDataUSAC(const ConfigParams& cfg)
   if (usac_sampling_method_ == USACConfig::SAMP_PROSAC)
     {
       prosac_sorted_point_indices_.assign(cfg.prosac.sortedPointIndices, cfg.prosac.sortedPointIndices+cfg.common.numDataPoints);
-      initPROSAC(); 		// init the PROSAC data structures
+      initPROSAC();             // init the PROSAC data structures
     }
 
   // set up SPRT if required
   if (usac_verif_method_ == USACConfig::VERIF_SPRT)
     {
-      sprt_tM_	  = cfg.sprt.tM;
+      sprt_tM_    = cfg.sprt.tM;
       sprt_mS_      = cfg.sprt.mS;
       sprt_delta_   = cfg.sprt.delta;
       sprt_epsilon_ = cfg.sprt.epsilon;
@@ -347,8 +346,8 @@ bool USAC<ProblemType>::solve()
     }
 
   // timing stuff
-  //	LARGE_INTEGER tick, tock, freq;
-  //	QueryPerformanceCounter(&tick);
+  //    LARGE_INTEGER tick, tock, freq;
+  //    QueryPerformanceCounter(&tick);
 
   // ------------------------------------------------------------------------
   // main USAC loop
@@ -553,8 +552,8 @@ bool USAC<ProblemType>::solve()
 
   // ------------------------------------------------------------------------
   // output statistics
-  //	QueryPerformanceCounter(&tock);
-  //	QueryPerformanceFrequency(&freq);
+  //    QueryPerformanceCounter(&tock);
+  //    QueryPerformanceFrequency(&freq);
   std::cerr << "Number of hypotheses/models: " << usac_results_.hyp_count_ << "/" << usac_results_.model_count_ << std::endl;
   std::cerr << "Number of samples rejected by pre-validation: " << usac_results_.rejected_sample_count_ << std::endl;
   std::cerr << "Number of models rejected by pre-validation: " << usac_results_.rejected_model_count_ << std::endl;
@@ -569,8 +568,8 @@ bool USAC<ProblemType>::solve()
 
   // ------------------------------------------------------------------------
   // timing stuff
-  //	usac_results_.total_runtime_ = (double)(tock.QuadPart - tick.QuadPart)/(double)freq.QuadPart;
-  //	std::cerr << "Time: " << usac_results_.total_runtime_ << std::endl << std::endl;
+  //    usac_results_.total_runtime_ = (double)(tock.QuadPart - tick.QuadPart)/(double)freq.QuadPart;
+  //    std::cerr << "Time: " << usac_results_.total_runtime_ << std::endl << std::endl;
 
   // ------------------------------------------------------------------------
   // clean up
@@ -589,12 +588,12 @@ bool USAC<ProblemType>::solve()
 
 
 // ============================================================================================
-// generateUniformRandomSample: generate random sample uniformly distributed between 
+// generateUniformRandomSample: generate random sample uniformly distributed between
 // [0...dataSize-1]
 // note that the sample vector needs to be properly sized before calling this function
 // ============================================================================================
 template <class ProblemType>
-void USAC<ProblemType>::generateUniformRandomSample(unsigned int dataSize, unsigned int sampleSize, 
+void USAC<ProblemType>::generateUniformRandomSample(unsigned int dataSize, unsigned int sampleSize,
                                                     std::vector<unsigned int>* sample)
 {
   unsigned int count=0;
@@ -615,7 +614,7 @@ void USAC<ProblemType>::generateUniformRandomSample(unsigned int dataSize, unsig
 
 // ============================================================================================
 // initPROSAC: initializes PROSAC
-// sets up growth function and stopping criterion 
+// sets up growth function and stopping criterion
 // ============================================================================================
 template <class ProblemType> inline
 void USAC<ProblemType>::initPROSAC()
@@ -706,8 +705,8 @@ void USAC<ProblemType>::initPROSAC()
 
   // other initializations
   largest_size_prosac_ = usac_min_sample_size_;       // largest set sampled in PROSAC
-  subset_size_prosac_ = usac_min_sample_size_;		// size of the current sampling pool
-  stop_len_prosac_    = usac_num_data_points_;		// current stopping length
+  subset_size_prosac_ = usac_min_sample_size_;          // size of the current sampling pool
+  stop_len_prosac_    = usac_num_data_points_;          // current stopping length
 }
 
 
@@ -780,7 +779,7 @@ unsigned int USAC<ProblemType>::updatePROSACStopping(unsigned int hypCount)
 
       if (non_random_inliers_prosac_[i] < inlier_count)
         {
-          non_random_inliers_prosac_[i] = inlier_count;	// update the best inliers for the the subset [0...i]
+          non_random_inliers_prosac_[i] = inlier_count; // update the best inliers for the the subset [0...i]
 
           // update the number of samples based on this inlier count
           if ( (i == usac_num_data_points_-1) ||
@@ -811,7 +810,7 @@ unsigned int USAC<ProblemType>::updatePROSACStopping(unsigned int hypCount)
 
 
 // ============================================================================================
-// designSPRTTest: designs a new SPRT test (i.e., updates the SPRT decision threshold) based 
+// designSPRTTest: designs a new SPRT test (i.e., updates the SPRT decision threshold) based
 // on current values of delta and epsilon
 // ============================================================================================
 template <class ProblemType> inline
@@ -966,14 +965,14 @@ unsigned int USAC<ProblemType>::locallyOptimizeSolution(const unsigned int bestI
 
   delete[] weights;
   return lo_inliers;
-}	
+}
 
 
 // ============================================================================================
 // findInliers: given an error vector and threshold, returns the indices of inliers
 // ============================================================================================
 template <class ProblemType> inline
-unsigned int USAC<ProblemType>::findInliers(const std::vector<double>::iterator& errPtr, double threshold, 
+unsigned int USAC<ProblemType>::findInliers(const std::vector<double>::iterator& errPtr, double threshold,
                                             std::vector<unsigned int>* inliers)
 {
   unsigned int inlier_count = 0;
@@ -1023,7 +1022,7 @@ unsigned int USAC<ProblemType>::updateStandardStopping(unsigned int numInliers, 
 
 
 // ============================================================================================
-// updateSPRTStopping: updates the stopping criterion accounting for erroneous rejections in 
+// updateSPRTStopping: updates the stopping criterion accounting for erroneous rejections in
 // the SPRT test
 // ============================================================================================
 template <class ProblemType> inline
@@ -1087,14 +1086,14 @@ double USAC<ProblemType>::computeExpSPRT(double newEpsilon, double epsilon, doub
 
 
 // ============================================================================================
-// addTestHistorySPRT: store statistics for each SPRT test (since each test is adjusted to 
+// addTestHistorySPRT: store statistics for each SPRT test (since each test is adjusted to
 // reflect current estimates of these parameters)
 // this is required to compute the number of samples for termination
 // ============================================================================================
 template <class ProblemType> inline
-typename USAC<ProblemType>::TestHistorySPRT* USAC<ProblemType>::addTestHistorySPRT(double epsilon, double delta, unsigned int numHyp, 
-										   TestHistorySPRT* testHistory,
-										   unsigned int* lastUpdate)
+typename USAC<ProblemType>::TestHistorySPRT* USAC<ProblemType>::addTestHistorySPRT(double epsilon, double delta, unsigned int numHyp,
+                                                                                   TestHistorySPRT* testHistory,
+                                                                                   unsigned int* lastUpdate)
 {
   TestHistorySPRT *new_test_history = new TestHistorySPRT;
   new_test_history->epsilon_ = epsilon;
@@ -1144,4 +1143,4 @@ void USAC<ProblemType>::storeSolution(unsigned int modelIndex, unsigned int numI
   static_cast<ProblemType *>(this)->storeModel(modelIndex, numInliers);
 }
 
-#endif   
+#endif
