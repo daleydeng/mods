@@ -1,8 +1,12 @@
 *.o
 *.os
 *.so
+*.a
 *.log
+log.txt
 run_mods
+samples/imgOut1.png
+samples/imgOut2.png
 
 build
 data

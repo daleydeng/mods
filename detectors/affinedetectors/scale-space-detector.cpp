@@ -9,9 +9,9 @@ using namespace std;
 namespace mods {
 
 int DetectAffineKeypoints(cv::Mat &input, vector<AffineKeypoint> &out1,
-                          ScaleSpaceDetectorParams params,
+                          const ScaleSpaceDetectorParams &params,
                           ScalePyramid &scale_pyramid,
-                          const double tilt, const double zoom)
+                          double tilt, double zoom)
 {
   PyramidParams p1 = params.PyramidPars;
   AffineShapeParams ap = params.AffineShapePars;

@@ -10,8 +10,8 @@
 #include "io_mods.h"
 #include "matching.hpp"
 #include "configuration.hpp"
-#include "imagerepresentation.h"
-#include "correspondencebank.h"
+#include "imagerepresentation.hpp"
+#include "correspondencebank.hpp"
 
 #ifdef _OPENMP
 #include <omp.h>

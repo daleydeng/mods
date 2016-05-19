@@ -43,7 +43,7 @@ protected:
   TimeLog TimeSpent;
   void AddRegions(AffineRegionVector& RegionsToAdd,std::string det_name, std::string desc_name);
   void AddRegions(AffineRegionVectorMap& RegionsMapToAdd,std::string det_name);
-  void AddRegionsToList(AffineRegionList &kp_list, AffineRegionList &new_kps);
+  void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector &new_kps);
 
   std::map<std::string, AffineRegionVectorMap> RegionVectorMap;
   std::string Name;

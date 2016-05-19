@@ -310,7 +310,7 @@ void AddMatchingsToList(TentativeCorrespListExt &tent_list, TentativeCorrespList
     tent_list.TCList.push_back(*ptr);
 }
 
-int MatchFlannFGINN(const AffineRegionList &list1, const AffineRegionList &list2, TentativeCorrespListExt &corresp,const MatchPars &par, const int nn)
+int MatchFlannFGINN(const AffineRegionVector &list1, const AffineRegionVector &list2, TentativeCorrespListExt &corresp,const MatchPars &par, const int nn)
 {
   double sqminratio = par.currMatchRatio* par.currMatchRatio;
   double contrDistSq = par.contradDist *par.contradDist;
@@ -416,7 +416,7 @@ int MatchFlannFGINN(const AffineRegionList &list1, const AffineRegionList &list2
   return matches;
 }
 
-int MatchFLANNDistance(const AffineRegionList &list1, const AffineRegionList &list2, TentativeCorrespListExt &corresp,const MatchPars &par, const int nn)
+int MatchFLANNDistance(const AffineRegionVector &list1, const AffineRegionVector &list2, TentativeCorrespListExt &corresp,const MatchPars &par, const int nn)
 {
 
   int max_distance = (int)float(par.matchDistanceThreshold);

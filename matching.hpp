@@ -202,10 +202,10 @@ typedef std::pair<cv::Point2f,cv::Point2f> corresp;
 void AddMatchingsToList(TentativeCorrespListExt &tent_list, TentativeCorrespListExt &new_tents);
 cv::flann::Index GenFLANNIndex(cv::Mat keys, cvflann::flann_algorithm_t indexType, cvflann::flann_distance_t dist_type, const int nTrees = 4);
 
-int MatchFlannFGINN(const AffineRegionList &list1, const AffineRegionList &list2,
+int MatchFlannFGINN(const AffineRegionVector &list1, const AffineRegionVector &list2,
                   TentativeCorrespListExt &corresp,const MatchPars &par, const int nn=50);
 
-int MatchFLANNDistance(const AffineRegionList &list1, const AffineRegionList &list2,
+int MatchFLANNDistance(const AffineRegionVector &list1, const AffineRegionVector &list2,
                   TentativeCorrespListExt &corresp,const MatchPars &par, const int nn=50);
 
 int USACFiltering(TentativeCorrespListExt &in_corresp,

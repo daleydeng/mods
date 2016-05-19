@@ -9,7 +9,7 @@
 #include "detectors_parameters.hpp"
 #include "descriptors_parameters.hpp"
 #include "matching.hpp"
-#include "imagerepresentation.h"
+#include "imagerepresentation.hpp"
 
 namespace mods {
 

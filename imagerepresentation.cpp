@@ -1,5 +1,5 @@
-#include "imagerepresentation.h"
-#include "synth-detection.hpp"
+#include "imagerepresentation.hpp"
+#include "synth_detection.hpp"
 #include "detectors/mser/extrema/extrema.h"
 #include <opencv2/features2d/features2d.hpp>
 //#include <opencv2/nonfree/nonfree.hpp>
@@ -440,11 +440,11 @@ void ImageRepresentation::AddRegions(AffineRegionVectorMap &RegionsMapToAdd, std
     AddRegions(desc_it->second,det_name,desc_it->first);
 }
 
-void ImageRepresentation::AddRegionsToList(AffineRegionList &kp_list, AffineRegionList &new_kps)
+void ImageRepresentation::AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector &new_kps)
 {
   int size = (int)kp_list.size();
   unsigned int new_size = size + new_kps.size();
-  AffineRegionList::iterator ptr = new_kps.begin();
+  AffineRegionVector::iterator ptr = new_kps.begin();
   for (unsigned int i=size; i< new_size; i++, ptr++)
     {
       AffineRegion temp_reg = *ptr;
@@ -454,6 +454,85 @@ void ImageRepresentation::AddRegionsToList(AffineRegionList &kp_list, AffineRegi
     }
 }
 
+static const double mrSizeORB = 3.0;
+
+int DetectORBs(cv::Mat &input, std::vector<AffineKeypoint> &out1, const ORBParams &params, ScalePyramid &scale_pyramid, double tilt = 1.0, double zoom = 1.0) {
+  std::vector<cv::KeyPoint> keys;
+  auto det = cv::ORB::create(
+      params.nfeatures,
+      params.scaleFactor,
+      params.nlevels,
+      params.edgeThreshold,
+      params.firstLevel,
+      params.WTA_K,
+      cv::ORB::HARRIS_SCORE,
+      params.PEParam.patchSize);
+
+  cv::Mat img;
+  input.convertTo(img, CV_8U);
+  det->detect(img, keys);
+
+  int kp_size = keys.size();
+  out1.resize(kp_size);
+  for (int kp_num=0; kp_num<kp_size; kp_num++)
+  {
+    auto &tmp_kp = out1[kp_num];
+    auto &key = keys[kp_num];
+
+    tmp_kp.x = key.pt.x;
+    tmp_kp.y = key.pt.y;
+    tmp_kp.a11 = cos(key.angle*M_PI/180.0);
+    tmp_kp.a12 = sin(key.angle*M_PI/180.0);
+    tmp_kp.a21 = -sin(key.angle*M_PI/180.0);
+    tmp_kp.a22 = cos(key.angle*M_PI/180.0);
+    tmp_kp.s = key.size / mrSizeORB;
+    tmp_kp.response = key.response;
+  }
+  return kp_size;
+}
+
+void DescribeORBs(AffineRegionVector &aff_descs, cv::Mat &input, ORBParams &param, int w0, int h0) {
+  auto det = cv::ORB::create(
+      param.nfeatures,
+      param.scaleFactor,
+      param.nlevels,
+      param.edgeThreshold,
+      param.firstLevel,
+      param.WTA_K,
+      cv::ORB::HARRIS_SCORE,
+      param.PEParam.patchSize);
+  cv::Mat descriptors;
+  std::vector<cv::KeyPoint> keys;
+  cv::Mat img;
+  cv::Mat mask;
+  input.convertTo(img, CV_8U);
+  det->detectAndCompute(img, mask, keys, descriptors);
+  int kp_size = keys.size();
+  int desc_size = descriptors.cols;
+
+  aff_descs.resize(kp_size);
+  for (int kp_num = 0; kp_num < kp_size; kp_num++) {
+    auto &aff_desc = aff_descs[kp_num];
+    auto &key = keys[kp_num];
+
+    aff_desc.det_kp.x = key.pt.x;
+    aff_desc.det_kp.y = key.pt.y;
+    aff_desc.det_kp.a11 = cos(key.angle * M_PI / 180.0);
+    aff_desc.det_kp.a12 = sin(key.angle * M_PI / 180.0);
+    aff_desc.det_kp.a21 = -sin(key.angle * M_PI / 180.0);
+    aff_desc.det_kp.a22 = cos(key.angle * M_PI / 180.0);
+    aff_desc.det_kp.s = key.size / mrSizeORB;
+    aff_desc.det_kp.response = key.response;
+    aff_desc.type = DET_ORB;
+    aff_desc.desc.type = DESC_ORB;
+    aff_desc.desc.vec.resize(desc_size);
+
+    unsigned char *descPtr = descriptors.ptr<unsigned char>(kp_num);
+    for (int jj = 0; jj < desc_size; jj++, descPtr++)
+      aff_desc.desc.vec[jj] = (float) *descPtr;
+  }
+
+}
 
 void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisParam &synth_par,
                                                         DetectorsParameters &det_par,
@@ -506,18 +585,8 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                  synth_par[curr_det][synth].zoom,
                                  synth_par[curr_det][synth].InitSigma,
                                  synth_par[curr_det][synth].doBlur, synth);
-          bool doExternalAffineAdaptation = false;
           time1 = ((double)(getMilliSecs1() - s_time))/1000;
           TimeSpent.SynthTime += time1;
-
-          ///Structures initialization
-          cv::Mat CharImage; //for OpenCV detectors
-
-          std::vector<cv::KeyPoint> keypoints_1; //for binary-dets
-          cv::Mat descriptors_1; //for binary-dets
-
-          bool OpenCV_det = (curr_det.compare("ORB") == 0);
-          const double mrSizeORB = 3.0;
 
           bool present_SIFT_like_desc = false;
           bool present_HalfSIFT_like_desc = false;
@@ -552,46 +621,17 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
               DetectAffineRegions(temp_img1, temp_kp1,det_par.MSERParam,DET_MSER,DetectMSERs);
             }
           else if (curr_det.compare("ORB")==0)
-            {
-              doExternalAffineAdaptation = det_par.ORBParam.doBaumberg;
-              cv::OrbFeatureDetector CurrentDetector(det_par.ORBParam.nfeatures,
-                                                     det_par.ORBParam.scaleFactor,
-                                                     det_par.ORBParam.nlevels,
-                                                     det_par.ORBParam.edgeThreshold,
-                                                     det_par.ORBParam.firstLevel,
-                                                     det_par.ORBParam.WTA_K,
-                                                     cv::ORB::HARRIS_SCORE,
-                                                     det_par.ORBParam.PEParam.patchSize);
-              temp_img1.pixels.convertTo(CharImage,CV_8U);
-              CurrentDetector.detect(CharImage, keypoints_1);
-              int kp_size = keypoints_1.size();
-              temp_kp1.resize(kp_size);
-              for (int kp_num=0; kp_num<kp_size; kp_num++)
-                {
-                  temp_kp1[kp_num].det_kp.x = keypoints_1[kp_num].pt.x;
-                  temp_kp1[kp_num].det_kp.y = keypoints_1[kp_num].pt.y;
-                  temp_kp1[kp_num].det_kp.a11 = cos(keypoints_1[kp_num].angle*M_PI/180.0);
-                  temp_kp1[kp_num].det_kp.a12 = sin(keypoints_1[kp_num].angle*M_PI/180.0);
-                  temp_kp1[kp_num].det_kp.a21 = -sin(keypoints_1[kp_num].angle*M_PI/180.0);
-                  temp_kp1[kp_num].det_kp.a22 = cos(keypoints_1[kp_num].angle*M_PI/180.0);
-                  temp_kp1[kp_num].det_kp.s = keypoints_1[kp_num].size / mrSizeORB;
-                  temp_kp1[kp_num].det_kp.response = keypoints_1[kp_num].response;
-                  temp_kp1[kp_num].type = DET_ORB;
-                }
-            }
+          {
+              DetectAffineRegions(temp_img1, temp_kp1, det_par.ORBParam, DET_ORB, DetectORBs);
+              if (det_par.ORBParam.doBaumberg) {
+                AffineRegionVector temp_kp_aff;
+                DetectAffineShape(temp_kp1, temp_kp_aff, temp_img1, det_par.BaumbergParam);
+                temp_kp1 = temp_kp_aff;
+              }
+          }
 
           time1 = ((double)(getMilliSecs1() - s_time))/1000;
           TimeSpent.DetectTime += time1;
-
-          //Baumberg iteration
-          if (doExternalAffineAdaptation) {
-              AffineRegionVector temp_kp_aff;
-              DetectAffineShape(temp_kp1,
-                                temp_kp_aff,
-                                temp_img1,
-                                det_par.BaumbergParam);
-              temp_kp1 = temp_kp_aff;
-            }
 
           //
           /// Orientation estimation
@@ -699,58 +739,10 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.PixelsParam.PEParam.photoNorm);
                 }
               else if (curr_desc.compare("ORB") == 0) //ORB (not uses orientation estimated points)
-                {
-                  cv::OrbFeatureDetector CurrentDescriptor(det_par.ORBParam.nfeatures,
-                                                           det_par.ORBParam.scaleFactor,
-                                                           det_par.ORBParam.nlevels,
-                                                           det_par.ORBParam.edgeThreshold,
-                                                           det_par.ORBParam.firstLevel,
-                                                           det_par.ORBParam.WTA_K,
-                                                           cv::ORB::HARRIS_SCORE,
-                                                           det_par.ORBParam.PEParam.patchSize);
-                  if (OpenCV_det) //no data conversion needed
-                    {
-                      CurrentDescriptor.compute(CharImage, keypoints_1, descriptors_1);
-                    }
-                  else {
-                      unsigned int kp_size = temp_kp1.size();
-                      keypoints_1.reserve(kp_size);
-                      for (unsigned int kp_num = 0; kp_num < kp_size; kp_num++) {
-                          cv::KeyPoint temp_pt;
-                          temp_pt.pt.x = temp_kp1[kp_num].det_kp.x;
-                          temp_pt.pt.y = temp_kp1[kp_num].det_kp.y;
-                          temp_pt.angle = 0;
-                          temp_pt.size = temp_kp1[kp_num].det_kp.s;
-                          keypoints_1.push_back(temp_pt);
-                        }
-                      temp_img1.pixels.convertTo(CharImage, CV_8U);
-                      CurrentDescriptor.compute(CharImage, keypoints_1, descriptors_1);
-                    }
-                  int kp_size = keypoints_1.size();
-                  int desc_size = descriptors_1.cols;
-
-                  temp_kp1_desc.resize(kp_size);
-
-                  for (int kp_num = 0; kp_num < kp_size; kp_num++) {
-                      temp_kp1_desc[kp_num].det_kp.x = keypoints_1[kp_num].pt.x;
-                      temp_kp1_desc[kp_num].det_kp.y = keypoints_1[kp_num].pt.y;
-                      temp_kp1_desc[kp_num].det_kp.a11 = cos(keypoints_1[kp_num].angle * M_PI / 180.0);
-                      temp_kp1_desc[kp_num].det_kp.a12 = sin(keypoints_1[kp_num].angle * M_PI / 180.0);
-                      temp_kp1_desc[kp_num].det_kp.a21 = -sin(keypoints_1[kp_num].angle * M_PI / 180.0);
-                      temp_kp1_desc[kp_num].det_kp.a22 = cos(keypoints_1[kp_num].angle * M_PI / 180.0);
-                      temp_kp1_desc[kp_num].det_kp.s = keypoints_1[kp_num].size / mrSizeORB;
-                      temp_kp1_desc[kp_num].det_kp.response = keypoints_1[kp_num].response;
-                      temp_kp1_desc[kp_num].type = temp_kp1[0].type;
-                      temp_kp1_desc[kp_num].desc.type = DESC_ORB;
-                      temp_kp1_desc[kp_num].desc.vec.resize(desc_size);
-
-                      unsigned char *descPtr = descriptors_1.ptr<unsigned char>(kp_num);
-                      for (int jj = 0; jj < desc_size; jj++, descPtr++)
-                        temp_kp1_desc[kp_num].desc.vec[jj] = (float) *descPtr;
-                    }
-                  ReprojectRegionsAndRemoveTouchBoundary(temp_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, mrSizeORB);
-                  //          std::cout << "new size=" << temp_kp1_desc.size() << std::endl;
-                }
+              {
+                DescribeORBs(temp_kp1_desc, temp_img1.pixels, det_par.ORBParam, OriginalImg.cols, OriginalImg.rows);
+                ReprojectRegionsAndRemoveTouchBoundary(temp_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, mrSizeORB);
+              }
 
               temp_kp_map[curr_desc] = temp_kp1_desc;
 

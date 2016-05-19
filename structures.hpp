@@ -224,7 +224,6 @@ struct PatchExtractionParams {
 
 typedef std::vector<AffineRegion> AffineRegionVector;
 typedef std::map <std::string, AffineRegionVector> AffineRegionVectorMap;
-typedef std::vector<AffineRegion> AffineRegionList;
 
 struct WhatToMatch
 {

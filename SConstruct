@@ -1,17 +1,17 @@
 from glob import glob
 
-env = DefaultEnvironment()
-env.Append(
-    CXXFLAGS="-O2 -Wall -std=c++11 -fdiagnostics-color=auto",
+env = DefaultEnvironment(
+    CCFLAGS="-O2 -Wall -std=c++11 -fdiagnostics-color=auto",
     LINKFLAGS="-Wl,--unresolved-symbols=ignore-in-shared-libs -Wl,--as-needed",
     CPPPATH=['/usr/local/include'],
     LIBPATH=['/usr/local/lib', '/usr/local/lib64'],
 )
 
 env.Append(
-    CXXFLAGS=['-DA64 -fopenmp'],
-    CPPPATH=['detectors/mser/LL/', 'detectors/mser/utls/'],
-    LIBS=['gomp', 'lapack']+ ['opencv_'+i for i in ["core", "highgui", "imgproc", "flann", "video", "features2d", "calib3d"]]
+    CXXFLAGS='-DA64 -fopenmp',
+    CPPPATH=['detectors/mser/LL/', 'detectors/mser/utls/', '/usr/local/opencv3/include'],
+    LIBPATH=['/usr/local/opencv3/lib'],
+    LIBS=['gomp', 'lapack']+ ['opencv_'+i for i in ["core", "highgui", "imgproc", "flann", "video", "features2d", "calib3d", 'imgcodecs']]
 )
 
 srcs = glob('*.cpp')

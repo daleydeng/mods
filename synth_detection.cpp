@@ -4,7 +4,7 @@
 
 #undef __STRICT_ANSI__
 
-#include "synth-detection.hpp"
+#include "synth_detection.hpp"
 #include <opencv2/features2d/features2d.hpp>
 #include "detectors/mser/utls/matrix.h"
 #include "detectors/mser/extrema/extrema.h"
@@ -426,14 +426,14 @@ bool HIsEye(double* H) {
       fabs(H[6]) + fabs(H[7]) + fabs(H[8] - 1.0) < eps1);
 
 }
-int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionList &keypoints, double *H, int orig_w, int orig_h, const double mrSize) {
+int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, const double mrSize) {
 
   cv::Mat H1(3, 3, CV_64F, H);
   cv::Mat Hinv(3, 3, CV_64F);
   cv::invert(H1, Hinv, cv::DECOMP_LU);
   double *HinvPtr = (double *) Hinv.data;
 
-  AffineRegionList::iterator ptr = keypoints.begin();
+  AffineRegionVector::iterator ptr = keypoints.begin();
   if (HIsEye(H)) {
       for (unsigned i = 0; i < keypoints.size(); i++, ptr++) {
           ptr->reproj_kp = ptr->det_kp;
@@ -445,7 +445,7 @@ int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionList &keypoints, double *
         }
     }
 
-  AffineRegionList temp_keypoints;
+  AffineRegionVector temp_keypoints;
   temp_keypoints.reserve(keypoints.size());
   ptr = keypoints.begin();
   for (unsigned int i=0; i < keypoints.size(); i++, ptr++)
@@ -465,11 +465,11 @@ int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionList &keypoints, double *
   keypoints = temp_keypoints;
   return (int)keypoints.size();
 }
-void AddRegionsToList(AffineRegionList &kp_list, AffineRegionList &new_kps)
+void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector &new_kps)
 {
   int size = (int)kp_list.size();
   unsigned int new_size = size + new_kps.size();
-  AffineRegionList::iterator ptr = new_kps.begin();
+  AffineRegionVector::iterator ptr = new_kps.begin();
   for (unsigned int i=size; i< new_size; i++, ptr++)
     {
       AffineRegion temp_reg = *ptr;
@@ -478,10 +478,10 @@ void AddRegionsToList(AffineRegionList &kp_list, AffineRegionList &new_kps)
       kp_list.push_back(temp_reg);
     }
 }
-void AddRegionsToListByType(AffineRegionList &kp_list, AffineRegionList &new_kps,int type)
+void AddRegionsToListByType(AffineRegionVector &kp_list, AffineRegionVector &new_kps,int type)
 {
   int size = (int)kp_list.size();
-  AffineRegionList::iterator ptr =new_kps.begin();
+  AffineRegionVector::iterator ptr =new_kps.begin();
   unsigned int new_size = size + new_kps.size();
   for (unsigned int i=size; i< new_size; i++, ptr++)
     {
@@ -612,8 +612,8 @@ public:
       }
   }
 };
-int DetectOrientation(AffineRegionList &in_kp_list,
-                      AffineRegionList &out_kp_list,
+int DetectOrientation(AffineRegionVector &in_kp_list,
+                      AffineRegionVector &out_kp_list,
                       SynthImage &img,
                       const double mrSize,
                       const int patchSize,
@@ -621,7 +621,7 @@ int DetectOrientation(AffineRegionList &in_kp_list,
                       const int maxAngNum,
                       const double th,
                       const bool addUpRight) {
-  AffineRegionList temp_kp_list;
+  AffineRegionVector temp_kp_list;
   temp_kp_list.reserve(in_kp_list.size());
 
   AffineRegion temp_region, const_temp_region;
@@ -692,8 +692,8 @@ int DetectOrientation(AffineRegionList &in_kp_list,
   return (int)temp_kp_list.size();
 }
 
-int DetectAffineShape(AffineRegionList &in_kp_list,
-                      AffineRegionList &out_kp_list,
+int DetectAffineShape(AffineRegionVector &in_kp_list,
+                      AffineRegionVector &out_kp_list,
                       SynthImage &img,
                       const AffineShapeParams par) {
 
@@ -845,9 +845,9 @@ int DetectAffineShape(AffineRegionList &in_kp_list,
         }
     }
 }
-void ReadKPsMik(AffineRegionList &keys, std::istream &in1) //Mikolajczuk.
+void ReadKPsMik(AffineRegionVector &keys, std::istream &in1) //Mikolajczuk.
 {
-  AffineRegionList temp_keys;
+  AffineRegionVector temp_keys;
   AffineRegion temp_reg;
   int n_regs;
   double rub;

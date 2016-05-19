@@ -56,47 +56,45 @@ void GenerateSynthImageCorr(const cv::Mat &in_img,
 
 
 template<typename T, typename params>
-int DetectAffineRegions(SynthImage &img, AffineRegionList &keypoints, params par, detector_type det_type,
-                        int (*detector)(cv::Mat &input, std::vector<T> &out,const params par,ScalePyramid &scale_pyramid,
-                                        const double tilt,const double zoom))
-//Function detects affine regions using detector function and writes them into AffineRegionList structure
+int DetectAffineRegions(SynthImage &img, AffineRegionVector &keypoints, params par, detector_type det_type, int (*detector)(cv::Mat &input, std::vector<T> &out,const params &par,ScalePyramid &scale_pyramid, double tilt, double zoom))
+//Function detects affine regions using detector function and writes them into AffineRegionVector structure
 {
   keypoints.clear();
-  int RegionsNumber=0;
+  int region_nr=0;
   std::vector<T> out1;
-  RegionsNumber=detector(img.pixels, out1, par,img.pyramid, img.tilt, img.zoom);
+  region_nr=detector(img.pixels, out1, par, img.pyramid, img.tilt, img.zoom);
   typename std::vector<T>::iterator ptr = out1.begin();
-  keypoints.reserve(RegionsNumber);
-  AffineRegion AffRegTmp;
-  AffRegTmp.img_id=img.id;
-  AffRegTmp.img_reproj_id= 0;
-  AffRegTmp.type= det_type;
+  keypoints.reserve(region_nr);
+  AffineRegion ar;
+  ar.img_id=img.id;
+  ar.img_reproj_id= 0;
+  ar.type= det_type;
 
-  for (int i = 0; i < RegionsNumber; i++, ptr++)
+  for (int i = 0; i < region_nr; i++, ptr++)
   {
-    AffRegTmp.id = i;
-    AffRegTmp.det_kp.s=ptr->s * sqrt(fabs(ptr->a11 * ptr->a22 - ptr->a12 * ptr->a21));
+    ar.id = i;
+    ar.det_kp.s=ptr->s * sqrt(fabs(ptr->a11 * ptr->a22 - ptr->a12 * ptr->a21));
     rectifyTransformation(ptr->a11,ptr->a12,ptr->a21,ptr->a22);
-    AffRegTmp.det_kp.x = ptr->x;
-    AffRegTmp.det_kp.y = ptr->y;
-    AffRegTmp.det_kp.a11 = ptr->a11;
-    AffRegTmp.det_kp.a12 = ptr->a12;
-    AffRegTmp.det_kp.a21 = ptr->a21;
-    AffRegTmp.det_kp.a22 = ptr->a22;
-    AffRegTmp.det_kp.response = ptr->response;
-    AffRegTmp.det_kp.sub_type = ptr->sub_type;
-    keypoints.push_back(AffRegTmp);
+    ar.det_kp.x = ptr->x;
+    ar.det_kp.y = ptr->y;
+    ar.det_kp.a11 = ptr->a11;
+    ar.det_kp.a12 = ptr->a12;
+    ar.det_kp.a21 = ptr->a21;
+    ar.det_kp.a22 = ptr->a22;
+    ar.det_kp.response = ptr->response;
+    ar.det_kp.sub_type = ptr->sub_type;
+    keypoints.push_back(ar);
   }
-  return RegionsNumber;
+  return region_nr;
 }
 
-int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionList &keypoints, double *H, int orig_w, int orig_h, const double mrSize = 3.0*sqrt(3.0));
+int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, const double mrSize = 3.0*sqrt(3.0));
 //Function reprojects detected regions to other image ("original") using H matrix (H is from original to tilted).
 //Then all regions that are outside original image (fully or partially) are deleted.
 
 
-int DetectOrientation(AffineRegionList &in_kp_list,
-                      AffineRegionList &out_kp_list1,
+int DetectOrientation(AffineRegionVector &in_kp_list,
+                      AffineRegionVector &out_kp_list1,
                       SynthImage &img,
                       const  double mrSize = 3.0*sqrt(3.0),
                       const int patchSize = 41,
@@ -105,8 +103,8 @@ int DetectOrientation(AffineRegionList &in_kp_list,
                       const double th = 0.8,
                       const bool addUpRight = false);
 
-int DetectAffineShape(AffineRegionList &in_kp_list,
-                      AffineRegionList &out_kp_list1,
+int DetectAffineShape(AffineRegionVector &in_kp_list,
+                      AffineRegionVector &out_kp_list1,
                       SynthImage &img,
                       const AffineShapeParams par);
 
@@ -114,7 +112,7 @@ int DetectAffineShape(AffineRegionList &in_kp_list,
 //All points that derived from one have the same parent_id
 
 template <typename FuncType>
-void DescribeRegions(AffineRegionList &in_kp_list,
+void DescribeRegions(AffineRegionVector &in_kp_list,
                      SynthImage &img, FuncType descriptor,
                      double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false)
 //Describes region with SIFT or other descriptor
@@ -200,23 +198,23 @@ void DescribeRegions(AffineRegionList &in_kp_list,
     }
   }
 }
-void AddRegionsToList(AffineRegionList &kp_list, AffineRegionList& new_kps);
+void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector& new_kps);
 //Function for getting new regions ID right (original IDs are changed to new ones to ensure no collisions in kp_list)
 
-void AddRegionsToListByType(AffineRegionList &kp_list, AffineRegionList& new_kps, int type);
+void AddRegionsToListByType(AffineRegionVector &kp_list, AffineRegionVector& new_kps, int type);
 //Function for getting new regions ID right AND only given type
 
-void WriteKPs(AffineRegionList &keys, std::ostream &out1);
+void WriteKPs(AffineRegionVector &keys, std::ostream &out1);
 //Function writes keypoints to stream in format:
 //descriptor_size(default = 128) keys_number
 //x y scale a11 a12 a21 a22 desc[descriptor_size]
 
-void ReadKPs(AffineRegionList &keys, std::istream &in1);
+void ReadKPs(AffineRegionVector &keys, std::istream &in1);
 //Function reads keypoints from stream in format:
 //descriptor_size(default = 128) keys_number
 //x y scale a11 a12 a21 a22 desc[descriptor_size]
 
-void ReadKPsMik(AffineRegionList &keys, std::istream &in1);
+void ReadKPsMik(AffineRegionVector &keys, std::istream &in1);
 //Function reads keypoints from stream in Mikolajczuk format:
 //descriptor_size(default = 128) keys_number
 //x y scale a b c desc[descriptor_size]

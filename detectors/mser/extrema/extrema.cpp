@@ -4,17 +4,17 @@
 #undef __STRICT_ANSI__
 
 #include <iostream>
-#include <opencv2/core/core.hpp>
+#include <algorithm>
+#include <opencv2/highgui.hpp>
 
 #include "../utls/ecompat.h"
-#include "libExtrema.h"
 #include "../utls/timeutls.h"
 #include "../../../structures.hpp"
-#include "matrix.h"
 #include "../../../helpers.h"
+#include "libExtrema.h"
+#include "matrix.h"
 #include "extrema.h"
-#include <algorithm>
-#include <opencv2/highgui/highgui.hpp>
+
 using namespace std;
 using namespace extrema;
 
@@ -85,7 +85,7 @@ int prepareKeysForExport(vector<AffineKeypoint> &keys, ExtremaParams par, double
 
 namespace mods {
 
-int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, ExtremaParams params, const double tilt, const double zoom)
+int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParams &params, double tilt, double zoom)
 {
   extrema::ExtremaParams ep;
   ep = params;
@@ -120,7 +120,7 @@ int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, ExtremaParams para
 
       temp_img2 = (temp_img2 + 1.0)*127.0; //to have [0; 255] image
 
-      imwrite("wld.png",temp_img2);
+      cv::imwrite("wld.png",temp_img2);
 
       in_ptr = (float*)temp_img2.data;
       for(unsigned int i = 0; i < pixels; i++, ptr++,in_ptr++)
@@ -277,7 +277,7 @@ int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, ExtremaParams para
   return out1.size();
 }
 
-int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, ExtremaParams params, ScalePyramid &scale_pyramid, const double tilt, const double zoom)
+int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParams &params, ScalePyramid &scale_pyramid, double tilt, double zoom)
 {
   extrema::ExtremaParams ep;
   ep = params;
