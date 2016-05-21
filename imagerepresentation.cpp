@@ -65,9 +65,9 @@ void L2normalize(const float* input_arr, int size, std::vector<float> &output_ve
   for (int i = 0; i < size; ++i) {
       norm+=input_arr[i] * input_arr[i];
     }
-  const double norm_coef = 1.0/sqrt(norm);
+  double norm_coef = 1.0/sqrt(norm);
   for (int i = 0; i < size; ++i) {
-      const float v1 = floor(512.0*norm_coef*input_arr[i]);
+    float v1 = floor(512.0*norm_coef*input_arr[i]);
       output_vect[i] = v1;
     }
 }
@@ -77,9 +77,9 @@ void L1normalize(const float* input_arr, int size, std::vector<float> &output_ve
   for (int i = 0; i < size; ++i) {
       norm+=input_arr[i];
     }
-  const double norm_coef = 1.0/norm;
+  double norm_coef = 1.0/norm;
   for (int i = 0; i < size; ++i) {
-      const float v1 = floor(512.0*norm_coef*input_arr[i]);
+      float v1 = floor(512.0*norm_coef*input_arr[i]);
       output_vect[i] = v1;
     }
 }
@@ -90,9 +90,9 @@ void RootNormalize(const float* input_arr, int size, std::vector<float> &output_
   for (int i = 0; i < size; ++i) {
       norm+=input_arr[i];
     }
-  const double norm_coef = 1.0/norm;
+  double norm_coef = 1.0/norm;
   for (int i = 0; i < size; ++i) {
-      const float v1 = sqrt(512.0*norm_coef*input_arr[i]);
+      float v1 = sqrt(512.0*norm_coef*input_arr[i]);
       output_vect[i] = v1;
     }
 }

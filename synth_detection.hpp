@@ -64,12 +64,12 @@ int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double
 int DetectOrientation(AffineRegionVector &in_kp_list,
                       AffineRegionVector &out_kp_list1,
                       SynthImage &img,
-                      const  double mrSize = 3.0*sqrt(3.0),
+                      double mrSize = 3.0*sqrt(3.0),
                       int patchSize = 41,
-                      int doHalfSIFT = 0,
+                      bool doHalfSIFT = false,
                       int maxAngNum= 0,
                       double th = 0.8,
-                      const bool addUpRight = false);
+                      bool addUpRight = false);
 
 int DetectAffineShape(AffineRegionVector &in_kp_list,
                       AffineRegionVector &out_kp_list1,

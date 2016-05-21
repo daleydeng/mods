@@ -380,7 +380,7 @@ void smoothCircularBuffer(float *hist)
 }
 
 template <int bins>
-inline void addPeakAngle(const float *hist, vector<float> &angles, int a, int b, int c,
+inline void addPeakAngle(float *hist, vector<float> &angles, int a, int b, int c,
                          float threshold, vector<float> &peak_values)
 {
   if (hist[b] >= threshold && hist[b] > hist[a] && hist[b] > hist[c])
@@ -519,10 +519,10 @@ int DetectOrientation(AffineRegionVector &in_kp_list,
                       SynthImage &img,
                       double mrSize,
                       int patchSize,
-                      int doHalfSIFT,
+                      bool doHalfSIFT,
                       int maxAngNum,
                       double th,
-                      const bool addUpRight) {
+                      bool addUpRight) {
   AffineRegionVector temp_kp_list;
   temp_kp_list.reserve(in_kp_list.size());
 
@@ -652,10 +652,10 @@ int DetectAffineShape(AffineRegionVector &in_kp_list,
               // estimate SMM
               for (int i = 0; i < maskPixels; ++i)
                 {
-                  const float v = (*maskptr);
-                  const float gxx = *pfx;
-                  const float gyy = *pfy;
-                  const float gxy = gxx * gyy;
+                  float v = (*maskptr);
+                  float gxx = *pfx;
+                  float gyy = *pfy;
+                  float gxy = gxx * gyy;
 
                   a += gxx * gxx * v;
                   b += gxy * v;
