@@ -25,25 +25,25 @@ void rectifyTransformation(double &a11, double &a12, double &a21, double &a22);
 
 int SetVSPars (const std::vector <double> &scale_set,
                const std::vector <double> &tilt_set,
-               const double phi_base,
+               double phi_base,
                const std::vector <double> &FGINNThreshold,
                const std::vector <double> &DistanceThreshold,
                const std::vector <std::string> descriptors,
                std::vector<ViewSynthParameters> &par,
                std::vector<ViewSynthParameters> &prev_par,
-               const double InitSigma=0.5,
-               const int doBlur=1, const int dsplevels = 0,
-               const double mixSigma=1.0, const double maxSigma=1.0);
+               double InitSigma=0.5,
+               int doBlur=1, int dsplevels = 0,
+               double mixSigma=1.0, double maxSigma=1.0);
 //Function generates parameters for view synthesis based on gived scale, tilt and rotation sets, avoiding duplicates with previous synthesis.
 void GenerateSynthImageCorr(const cv::Mat &in_img,
                             SynthImage &out_img,
                             const std::string in_img_name,
                             double tilt,
-                            const double phi,
-                            const double zoom,
-                            const double InitSigma=0.5,
-                            const int doBlur=1,
-                            const int img_id = 0);
+                            double phi,
+                            double zoom,
+                            double InitSigma=0.5,
+                            int doBlur=1,
+                            int img_id = 0);
 //Function generates scaled, rotated and tilted image with homography from original to generated image and places all this into SynthImage structure
 //Phi is rotation angle in radians
 //Tilt - is scale factor in horizontal direction (to simulate real tilt)
@@ -51,7 +51,7 @@ void GenerateSynthImageCorr(const cv::Mat &in_img,
 //InitSigma (= 0.5 by default). Bluring is done with sigma_aa = InitSigma * tilt / 2 for tilting and sigma_aa = InitSigma / (4*zoom) for downscaling.
 //doBlur - to make gaussian convolution before scaling or no
 
-//void GenerateSynthImageByH(const cv::Mat &in_img, SynthImage &out_img,const double* H,const double InitSigma = 0.5,const int doBlur =1,const int img_id = 0);
+//void GenerateSynthImageByH(const cv::Mat &in_img, SynthImage &out_img,double* H,double InitSigma = 0.5,int doBlur =1,int img_id = 0);
 //Function generates scaled, rotated and tilted image from image and homography matrix from original to generated image and places all this into SynthImage structure
 
 
@@ -63,7 +63,7 @@ int DetectAffineRegions(SynthImage &img, AffineRegionVector &keypoints, params p
   int region_nr=0;
   std::vector<T> out1;
   region_nr=detector(img.pixels, out1, par, img.pyramid, img.tilt, img.zoom);
-  typename std::vector<T>::iterator ptr = out1.begin();
+  auto ptr = out1.begin();
   keypoints.reserve(region_nr);
   AffineRegion ar;
   ar.img_id=img.id;
@@ -88,7 +88,7 @@ int DetectAffineRegions(SynthImage &img, AffineRegionVector &keypoints, params p
   return region_nr;
 }
 
-int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, const double mrSize = 3.0*sqrt(3.0));
+int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, double mrSize = 3.0*sqrt(3.0));
 //Function reprojects detected regions to other image ("original") using H matrix (H is from original to tilted).
 //Then all regions that are outside original image (fully or partially) are deleted.
 
@@ -97,10 +97,10 @@ int DetectOrientation(AffineRegionVector &in_kp_list,
                       AffineRegionVector &out_kp_list1,
                       SynthImage &img,
                       const  double mrSize = 3.0*sqrt(3.0),
-                      const int patchSize = 41,
-                      const int doHalfSIFT = 0,
-                      const int maxAngNum= 0,
-                      const double th = 0.8,
+                      int patchSize = 41,
+                      int doHalfSIFT = 0,
+                      int maxAngNum= 0,
+                      double th = 0.8,
                       const bool addUpRight = false);
 
 int DetectAffineShape(AffineRegionVector &in_kp_list,
@@ -219,7 +219,7 @@ void ReadKPsMik(AffineRegionVector &keys, std::istream &in1);
 //descriptor_size(default = 128) keys_number
 //x y scale a b c desc[descriptor_size]
 
-void linH(const double x, const double y, double *H, double *linearH);
+void linH(double x, double y, double *H, double *linearH);
 //Function linearizes homography matrix to affine
 
 } // namespace mods

@@ -18,6 +18,7 @@ namespace mods {
 //const double k_sigma = /*2 **/ 3.0 * sqrt(3.0);//to compare ellipses in 3*sigma size
 const double eps1 = 0.01;
 using namespace std;
+using namespace cv;
 
 #define VERBOSE 0
 #define VERTICAL 1
@@ -41,16 +42,16 @@ void rectifyTransformation(double &a11, double &a12, double &a21, double &a22)
 
 int SetVSPars(const std::vector <double> &scale_set,
               const std::vector <double> &tilt_set,
-              const double phi_base,
+              double phi_base,
               const std::vector <double> &FGINNThreshold,
               const std::vector <double> &DistanceThreshold,
               const std::vector <std::string> descriptors,
               std::vector<ViewSynthParameters> &par,
               std::vector<ViewSynthParameters> &prev_par,
-              const double InitSigma,
-              const int doBlur,
-              const int dsplevels,
-              const double minSigma, const double maxSigma)
+              double InitSigma,
+              int doBlur,
+              int dsplevels,
+              double minSigma, double maxSigma)
 {
   par.clear();
   std::vector<ViewSynthParameters> prev_par_tmp(prev_par);
@@ -171,244 +172,115 @@ int SetVSPars(const std::vector <double> &scale_set,
   prev_par = prev_par_tmp;
   return (int)par.size();
 }
+
+template<typename T>
+static inline T round(T v) {
+  return floor(0.5+v);
+}
+
 void GenerateSynthImageCorr(const cv::Mat &in_img,
                             SynthImage &out_img,
                             const std::string in_img_name,
                             double tilt,
-                            const double phi,
-                            const double zoom,
-                            const double InitSigma,
-                            const int doBlur,
-                            const int img_id)
+                            double phi,
+                            double zoom,
+                            double init_sigma,
+                            int doBlur,
+                            int img_id)
 {
+  while (phi >= 2.0*M_PI)
+      phi -= 2.0*M_PI;
+  while (phi < 0 )
+      phi += 2.0*M_PI;
 
-  double phi_in_range = phi;
-  while (phi_in_range >= 2.0*M_PI) {
-      phi_in_range -= 2.0*M_PI;
-    }
-  while (phi_in_range < 0 ) {
-      phi_in_range += 2.0*M_PI;
-    }
-
-  int zoomed=0;
   bool vertical_tilt = false;
   if (tilt < 0) { // vertical tilt
       tilt = -tilt;
       vertical_tilt = true;
     }
-  if (fabs(zoom-1.0f)>=0.05) zoomed = 1;
+  bool zoomed = fabs(zoom-1.0f)>=0.05;
   cv::Mat temp_img, gray_in_img = in_img;
 
   double sigma_aa, sigma_aa_2, sigma_x,sigma_y;
-  int wS1=0, hS1=0;
   int w =in_img.cols;
   int h = in_img.rows;
-  double phi_deg = phi_in_range*180/M_PI;
-
+  auto out_H = out_img.H;
   out_img.OrigImgName= in_img_name;
 
-  wS1 = (int) (w * zoom);
-  hS1 = (int) (h * zoom);
-  if ((fabs(tilt - 1.) <=0.1) && (abs(phi_in_range) <= 0.2) && (fabs(zoom - 1.) <=0.1)) //original image
+  if ((fabs(tilt - 1.) <=0.1) && (abs(phi) <= 0.2) && (fabs(zoom - 1.) <=0.1)) //original image
     { out_img.rotation= 0.0;
       out_img.tilt= 1.0;
       out_img.zoom= 1.0;
       out_img.id = 0;
-      out_img.H[0]=1.0; out_img.H[1]=0;   out_img.H[2]=0;
-      out_img.H[3]=0;   out_img.H[4]=1.0; out_img.H[5]=0;
-      out_img.H[6]=0;   out_img.H[7]=0;   out_img.H[8]=1.0;
+      out_H[0]=1.0; out_H[1]=0;   out_H[2]=0;
+      out_H[3]=0;   out_H[4]=1.0; out_H[5]=0;
+      out_H[6]=0;   out_H[7]=0;   out_H[8]=1.0;
       out_img.pixels = gray_in_img;
       return;
     }
-  // else {
+
   out_img.id = img_id;
-  /// Affine transfromation matrix
-
-  double d,d2,w_new,h_new;
-  double kV=1.;
-  double kH=1.;
-  if (zoomed){
-      kV = (double)w/(double)wS1;
-      kH = (double)h/(double)hS1;
-    };
-  if (vertical_tilt) {
-      if ((phi_in_range>=0) && (phi_in_range<M_PI/2))
-        {
-          w_new=fabs(floor((0.5+cos(phi_in_range)*w+sin(phi_in_range)*h)/(kH)));
-          h_new=fabs(floor((0.5+sin(phi_in_range)*w+cos(phi_in_range)*h)/(tilt*kV)));
-          out_img.H[0]= cos(phi_in_range)/kH;        out_img.H[1]= sin(phi_in_range)/kH;         out_img.H[2]= 0;
-          out_img.H[3]=-sin(phi_in_range)/(tilt*kV); out_img.H[4] = cos(phi_in_range)/(tilt*kV); out_img.H[5]=floor(0.5+sin(phi_in_range)*w/(tilt*kV));
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-        }
-      if ((phi_in_range>=M_PI/2.0) && (phi_in_range<M_PI))
-        {
-          w_new=fabs(floor((0.5-cos(phi_in_range)*w+sin(phi_in_range)*h)/(kH)));
-          h_new=fabs(floor((0.5+sin(phi_in_range)*w-cos(phi_in_range)*h)/(tilt*kV)));
-          d=-floor(cos(phi_in_range)*w/kH);
-          d2=floor(0.5+(sin(phi_in_range)*w-cos(phi_in_range)*h)/(tilt*kV));
-          out_img.H[0]=cos(phi_in_range)/kH;         out_img.H[1]=sin(phi_in_range)/kH;         out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/(tilt*kV); out_img.H[4]=cos(phi_in_range)/(tilt*kV);  out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                   out_img.H[8]=1;
-        };
-
-      if ((phi_in_range>=M_PI) && (phi_in_range<= 3.0*M_PI/2.0))
-        {
-
-          w_new=fabs(floor((0.5+cos(phi_in_range)*w+sin(phi_in_range)*h)/(kH)));
-          h_new=fabs(floor((0.5+sin(phi_in_range)*w+cos(phi_in_range)*h)/(tilt*kV)));
-          d=floor(0.5+(-w*cos(phi_in_range)-sin(phi_in_range)*h));
-          d2=floor(0.5+(1 - cos(phi_in_range)*h)/(tilt*kV));
-
-          out_img.H[0]= cos(phi_in_range)/kH;        out_img.H[1]= sin(phi_in_range)/kH;         out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/(tilt*kV); out_img.H[4] = cos(phi_in_range)/(tilt*kV); out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-
-        }
-
-      if ((phi_in_range>=3.0*M_PI/2.0) && (phi_in_range< 2.0*M_PI))
-        {
-          w_new=fabs(floor((0.5+cos(phi_in_range)*w-sin(phi_in_range)*h)/(kH)));
-          h_new=fabs(floor((0.5-sin(phi_in_range)*w+cos(phi_in_range)*h)/(tilt*kV)));
-          d=floor(0.5+( -sin(phi_in_range)*h)*kH);
-          d2=0.;
-          out_img.H[0]= cos(phi_in_range)/(tilt*kH); out_img.H[1]= sin(phi_in_range)/(tilt*kH);  out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/kV;        out_img.H[4] = cos(phi_in_range)/kV;        out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-        }
-
-    } else {
-      if ((phi_in_range>=0) && (phi_in_range<M_PI/2))
-        {
-          w_new=fabs(floor((0.5+cos(phi_in_range)*w+sin(phi_in_range)*h)/(tilt*kH)));
-          h_new=fabs(floor((0.5+sin(phi_in_range)*w+cos(phi_in_range)*h)/(kV)));
-          out_img.H[0]= cos(phi_in_range)/(tilt*kH); out_img.H[1]= sin(phi_in_range)/(tilt*kH);  out_img.H[2]= 0;
-          out_img.H[3]=-sin(phi_in_range)/kV;        out_img.H[4] = cos(phi_in_range)/kV;        out_img.H[5]=floor(0.5+sin(phi_in_range)*w/kV);
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-        }
-      if ((phi_in_range>=M_PI/2.0) && (phi_in_range<M_PI)) {
-          w_new=fabs(floor((0.5-cos(phi_in_range)*w+sin(phi_in_range)*h)/(tilt*kH)));
-          h_new=fabs(floor((0.5+sin(phi_in_range)*w-cos(phi_in_range)*h)/(kV)));
-          d=-floor(cos(phi_in_range)*w/(tilt*kH));
-          d2=floor(0.5+(sin(phi_in_range)*w-cos(phi_in_range)*h)/kV);
-          out_img.H[0]=cos(phi_in_range)/(tilt*kH);  out_img.H[1]=sin(phi_in_range)/(tilt*kH);  out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/kV;        out_img.H[4]=cos(phi_in_range)/kV;         out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                   out_img.H[8]=1;
-        };
-
-      if ((phi_in_range>=M_PI) && (phi_in_range<= 3.0*M_PI/2.0)) {
-          w_new=fabs(floor((cos(phi_in_range)*w+sin(phi_in_range)*h)/(tilt*kH)));
-          h_new=fabs(floor((sin(phi_in_range)*w+cos(phi_in_range)*h)/(kV)));
-          d=floor(0.5+(-w*cos(phi_in_range)-sin(phi_in_range)*h)*(tilt*kH));
-          d2=floor(0.5+(1 - cos(phi_in_range)*h)/kV);
-          out_img.H[0]= cos(phi_in_range)/(tilt*kH); out_img.H[1]= sin(phi_in_range)/(tilt*kH);  out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/kV;        out_img.H[4] = cos(phi_in_range)/kV;        out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-        }
-
-      if ((phi_in_range>=3.0*M_PI/2.0) && (phi_in_range< 2.0*M_PI)) {
-          w_new=fabs(floor((0.5+cos(phi_in_range)*w-sin(phi_in_range)*h)/(tilt*kH)));
-          h_new=fabs(floor((0.5-sin(phi_in_range)*w+cos(phi_in_range)*h)/(kV)));
-          d=floor(0.5+( -sin(phi_in_range)*h)*(tilt*kH));
-          d2=0.;
-          out_img.H[0]= cos(phi_in_range)/(tilt*kH); out_img.H[1]= sin(phi_in_range)/(tilt*kH);  out_img.H[2]=d;
-          out_img.H[3]=-sin(phi_in_range)/kV;        out_img.H[4] = cos(phi_in_range)/kV;        out_img.H[5]=d2;
-          out_img.H[6]= 0;                  out_img.H[7]=0;                    out_img.H[8]=1;
-        }
-
-    }
-  out_img.rotation=phi_deg;
+  out_H[6]= 0;
+  out_H[7]=0;
+  out_H[8]=1;
+  double phi_deg = phi*180/M_PI;
+  out_img.rotation= phi_deg;
   out_img.tilt=tilt;
   out_img.zoom = zoom;
 
+  double nw = (abs(sin(phi)*h) + abs(cos(phi)*w)) * zoom;
+  double nh = (abs(cos(phi)*h) + abs(sin(phi)*w)) * zoom;
+  auto R = cv::getRotationMatrix2D(Point2f(nw/2, nh/2), phi_deg, zoom);
+  auto R_off = (Mat)(R * (cv::Mat_<double>(3,1) << (nw-w)/2, (nh-h)/2, 0));
+  R.at<double>(0,2) += R_off.at<double>(0, 0);
+  R.at<double>(1,2) += R_off.at<double>(1, 0);
+  cv::warpAffine(gray_in_img, temp_img, R,
+                 cv::Size(nw, nh),cv::INTER_LINEAR, cv::BORDER_CONSTANT,cv::Scalar(128,128,128));
+
   /// Anti-aliasing filtering
   if (zoomed)
-    sigma_aa_2 = InitSigma / (4.0*zoom);
+    sigma_aa_2 = init_sigma / (4.0*zoom);
   else
-    sigma_aa_2 = InitSigma / 2.0;
+    sigma_aa_2 = init_sigma / 2.0;
+  sigma_aa = init_sigma * tilt / (2.0*zoom);
 
-  sigma_aa = InitSigma * tilt / (2.0*zoom);
   if (vertical_tilt) {
-      sigma_x = sigma_aa_2;
-      sigma_y = sigma_aa;
-
-    } else {
-      sigma_x = sigma_aa;
-      sigma_y = sigma_aa_2;
-    }
-  int w_new_rot;
-  int h_new_rot;
-  double warpRot[6];
-
-  if ((phi_in_range>=0) && (phi_in_range<M_PI/2.0))
-    {
-      w_new_rot=fabs(floor((0.5+cos(phi_in_range)*w+sin(phi_in_range)*h)));
-      h_new_rot=fabs(floor((0.5+sin(phi_in_range)*w+cos(phi_in_range)*h)));
-      warpRot[0]= cos(phi_in_range); warpRot[1]= sin(phi_in_range);  warpRot[2]= 0;
-      warpRot[3]=-sin(phi_in_range); warpRot[4]= cos(phi_in_range); warpRot[5]=floor(0.5+sin(phi_in_range)*w);
-    }
-  if ((phi_in_range>=M_PI/2.0) && (phi_in_range<M_PI)) ///
-    {
-      w_new_rot=fabs(floor((0.5-cos(phi_in_range)*w+sin(phi_in_range)*h)));
-      h_new_rot=fabs(floor((0.5+sin(phi_in_range)*w-cos(phi_in_range)*h)));
-      d=-floor(cos(phi_in_range)*w);
-      d2=floor(0.5+(sin(phi_in_range)*w-cos(phi_in_range)*h));
-      warpRot[0]=cos(phi_in_range);  warpRot[1]=sin(phi_in_range);  warpRot[2]=d;
-      warpRot[3]=-sin(phi_in_range); warpRot[4]=cos(phi_in_range);  warpRot[5]=d2;
-    };
-  if ((phi_in_range>=M_PI) && (phi_in_range<= 3.0*M_PI/2.0)) ///
-    {
-      w_new_rot=fabs(floor((cos(phi_in_range)*w + sin(phi_in_range)*h)));
-      h_new_rot=fabs(floor((sin(phi_in_range)*w + cos(phi_in_range)*h)));
-      d=floor(0.5+(-w*cos(phi_in_range)-sin(phi_in_range)*h));
-      d2=floor(0.5+(1 - cos(phi_in_range)*h));
-
-      warpRot[0]=cos(phi_in_range);  warpRot[1]=sin(phi_in_range);  warpRot[2]=d;
-      warpRot[3]=-sin(phi_in_range); warpRot[4]=cos(phi_in_range);  warpRot[5]=d2;
-
-    };
-  if ((phi_in_range>=3.0*M_PI/2.0) && (phi_in_range<= 2.0*M_PI))
-    {
-      w_new_rot=fabs(floor((0.5+cos(phi_in_range)*w-sin(phi_in_range)*h)));
-      h_new_rot=fabs(floor((0.5-sin(phi_in_range)*w+cos(phi_in_range)*h)));
-      d=floor(0.5+( -sin(phi_in_range)*h));
-      d2=0.;
-
-      warpRot[0]=cos(phi_in_range);  warpRot[1]=sin(phi_in_range);  warpRot[2]=d;
-      warpRot[3]=-sin(phi_in_range); warpRot[4]=cos(phi_in_range);  warpRot[5]=d2;
-
-    };
-
-  cv::Mat warpMatrixRot(2,3,CV_64F,warpRot);
-  cv::warpAffine(gray_in_img, temp_img, warpMatrixRot,
-                 cv::Size(w_new_rot,h_new_rot),cv::INTER_LINEAR, cv::BORDER_CONSTANT,cv::Scalar(128,128,128));
+    sigma_x = sigma_aa_2;
+    sigma_y = sigma_aa;
+  } else {
+    sigma_x = sigma_aa;
+    sigma_y = sigma_aa_2;
+  }
   if (doBlur)
-    {
-      int k_size_x = floor(2.0 * 3.0 * sigma_x + 1.0);
-      if (k_size_x % 2 == 0)
-        k_size_x++;
-      if (k_size_x < 3) k_size_x = 3;
+  {
+    int k_size_x = round(2.0 * 3.0 * sigma_x + 1.0);
+    if (k_size_x % 2 == 0)
+      k_size_x++;
+    if (k_size_x < 3)
+      k_size_x = 3;
 
-      int k_size_y = floor(2.0 * 3.0 * sigma_y + 1.0);
-      if (k_size_y % 2 == 0)
-        k_size_y++;
-      if (k_size_y < 3) k_size_y = 3;
-      cv::GaussianBlur(temp_img,temp_img,cv::Size(k_size_x, k_size_y),sigma_x,sigma_y);
-    }
+    int k_size_y = round(2.0 * 3.0 * sigma_y + 1.0);
+    if (k_size_y % 2 == 0)
+      k_size_y++;
+    if (k_size_y < 3)
+      k_size_y = 3;
+    cv::GaussianBlur(temp_img,temp_img,cv::Size(k_size_x, k_size_y),sigma_x,sigma_y);
+  }
 
-  /// simulate a tilt-zoom
-  double warp_tilt_zoom[6];
-
+  double a, b;
   if (vertical_tilt) {
-      warp_tilt_zoom[0]=1.0/kH; warp_tilt_zoom[1]=0;  warp_tilt_zoom[2]=0;
-      warp_tilt_zoom[3]=0;        warp_tilt_zoom[4]=1.0/(tilt*kV);  warp_tilt_zoom[5]=0;
-
-    } else {
-      warp_tilt_zoom[0]=1.0/(tilt*kH); warp_tilt_zoom[1]=0;  warp_tilt_zoom[2]=0;
-      warp_tilt_zoom[3]=0;        warp_tilt_zoom[4]=1.0/kV;  warp_tilt_zoom[5]=0;
-    }
-  cv::Mat warpMatrix(2,3,CV_64F,warp_tilt_zoom);
-  cv::warpAffine(temp_img, out_img.pixels, warpMatrix,
-                 cv::Size(w_new,h_new),cv::INTER_LINEAR, cv::BORDER_CONSTANT,cv::Scalar(128,128,128));
+    a = 1;
+    b = 1/tilt;
+  } else {
+    a = 1/tilt;
+    b = 1;
+  }
+  Mat H1 = (cv::Mat_<double>(2,3) << a, 0, 0, 0, b, 0);
+  cv::warpAffine(temp_img, out_img.pixels, H1,
+                 cv::Size(nw*a,nh*b),cv::INTER_LINEAR, cv::BORDER_CONSTANT,cv::Scalar(128,128,128));
+  Mat H = H1(Range::all(), Range(0, 2)) * R;
+  out_H[0] = H.at<double>(0,0);   out_H[1] = H.at<double>(0,1);   out_H[2] = H.at<double>(0,2);
+  out_H[3] = H.at<double>(1,0);   out_H[4] = H.at<double>(1,1);   out_H[5] = H.at<double>(1,2);
 }
 void ReprojectByH(AffineKeypoint in_kp, AffineKeypoint &out_kp, double* H) //For H=[h11 h12 h13; h21 h22 h23; 0 0 1];
 {
@@ -426,7 +298,7 @@ bool HIsEye(double* H) {
       fabs(H[6]) + fabs(H[7]) + fabs(H[8] - 1.0) < eps1);
 
 }
-int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, const double mrSize) {
+int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, double mrSize) {
 
   cv::Mat H1(3, 3, CV_64F, H);
   cv::Mat Hinv(3, 3, CV_64F);
@@ -528,8 +400,9 @@ private:
   int pS;
   double magThresh;
   int doHalfSIFT;
+  static const int bins = 36;
 public:
-  EstimateDominantAnglesFunctor(int patchSize,const int doHalfSIFT1 = 0) : pS(patchSize),doHalfSIFT(doHalfSIFT1)
+  EstimateDominantAnglesFunctor(int patchSize,int doHalfSIFT1 = 0) : pS(patchSize),doHalfSIFT(doHalfSIFT1)
   {
     gmag = cv::Mat (pS, pS, CV_32FC1, cv::Scalar(0));
     gori = cv::Mat (pS, pS, CV_32FC1, cv::Scalar(0));
@@ -537,13 +410,12 @@ public:
     computeCircularGaussMask(orimask, pS/3.0f);
   }
   void operator()(const cv::Mat &img, vector<float> &angles1,
-                  const double max_th=0.8, int maxAngles= -1)
+                  double max_th=0.8, int maxAngles= -1)
   {
     if (maxAngles == 0) {
         angles1.clear();
         return;
       }
-    const int bins = 36;
     float hist[bins+1];
     vector<float> peak_values;
     for (int i = 0; i<bins; i++) hist[i] = 0.0f;
@@ -552,7 +424,7 @@ public:
 
     float *maskptr = orimask.ptr<float>(1);
     float *pmag = gmag.ptr<float>(1), *pori = gori.ptr<float>(1);
-    const int maskPixels = orimask.cols * (orimask.rows-2);
+    int maskPixels = orimask.cols * (orimask.rows-2);
 
     for (int i = 0; i < maskPixels; ++i)
       {
@@ -615,11 +487,11 @@ public:
 int DetectOrientation(AffineRegionVector &in_kp_list,
                       AffineRegionVector &out_kp_list,
                       SynthImage &img,
-                      const double mrSize,
-                      const int patchSize,
-                      const int doHalfSIFT,
-                      const int maxAngNum,
-                      const double th,
+                      double mrSize,
+                      int patchSize,
+                      int doHalfSIFT,
+                      int maxAngNum,
+                      double th,
                       const bool addUpRight) {
   AffineRegionVector temp_kp_list;
   temp_kp_list.reserve(in_kp_list.size());
@@ -723,7 +595,7 @@ int DetectAffineShape(AffineRegionVector &in_kp_list,
       float ratio =  temp_region.det_kp.s / (initialSigma);
       cv::Mat U, V, d, Au, Ap, D;
 
-      const int maskPixels = par.smmWindowSize * par.smmWindowSize;
+      int maskPixels = par.smmWindowSize * par.smmWindowSize;
       if (interpolateCheckBorders(img.pixels.cols,img.pixels.rows,
                                   (float) temp_region.det_kp.x,
                                   (float) temp_region.det_kp.y,
@@ -878,7 +750,7 @@ void ReadKPsMik(AffineRegionVector &keys, std::istream &in1) //Mikolajczuk.
   keys = temp_keys;
 }
 
-void linH(const double x, const double y, double *H, double *linearH)
+void linH(double x, double y, double *H, double *linearH)
 {
   double den, den_sq, num1_densq, num2_densq, a11,a12,a21,a22;
 
