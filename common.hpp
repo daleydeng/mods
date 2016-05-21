@@ -650,6 +650,11 @@ void computeGradient(const cv::Mat &img, cv::Mat &gradx, cv::Mat &grady);
 void computeGradientMagnitudeAndOrientation(const cv::Mat &img, cv::Mat &mag, cv::Mat &ori);
 double getTime();
 
+struct DescriptorFunctor {
+  virtual void operator()(cv::Mat &patch, std::vector<float>& desc) = 0;
+  descriptor_type type;
+};
+
 } //namespace mods
 
 #endif // MODS_COMMON_HPP

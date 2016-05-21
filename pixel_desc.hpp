@@ -39,7 +39,7 @@ void sort_idxs(const std::vector<Dtype> &v,
   return;
 }
 
-struct PIXELSDescriptor
+struct PIXELSDescriptor: DescriptorFunctor
 {
 public:
   PIXELSDescriptor(const PIXELSDescriptorParams &par)
@@ -85,9 +85,6 @@ public:
           }
       }
   }
-public:
-  descriptor_type type;
-
 private:
   PIXELSDescriptorParams par;
 };

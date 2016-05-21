@@ -3,9 +3,8 @@
 #include "common.hpp"
 
 namespace mods {
-struct SIFTDescriptor
+struct SIFTDescriptor: DescriptorFunctor
 {
-
 public:
   // top level interface
   SIFTDescriptor(const SIFTDescriptorParams &par) :
@@ -32,7 +31,6 @@ public:
   void RootSIFTnorm(std::vector<float> &in_vect);
   void SIFTnorm(std::vector<double> &in_vect);
   void RootSIFTnorm(std::vector<double> &in_vect);
-  descriptor_type type;
 
 private:
   // helper functions

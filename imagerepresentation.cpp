@@ -697,7 +697,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor RootSIFTdesc(desc_par.RootSIFTParam);
                   DescribeRegions(temp_kp1_desc,
-                                  temp_img1, RootSIFTdesc,
+                                  temp_img1, &RootSIFTdesc,
                                   desc_par.RootSIFTParam.PEParam.mrSize,
                                   desc_par.RootSIFTParam.PEParam.patchSize,
                                   desc_par.RootSIFTParam.PEParam.FastPatchExtraction,
@@ -707,7 +707,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor HalfRootSIFTdesc(desc_par.HalfRootSIFTParam);
                   DescribeRegions(temp_kp1_desc,
-                                  temp_img1, HalfRootSIFTdesc,
+                                  temp_img1, &HalfRootSIFTdesc,
                                   desc_par.HalfRootSIFTParam.PEParam.mrSize,
                                   desc_par.HalfRootSIFTParam.PEParam.patchSize,
                                   desc_par.HalfRootSIFTParam.PEParam.FastPatchExtraction,
@@ -718,7 +718,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                   ///Description
                   SIFTDescriptor HalfSIFTdesc(desc_par.HalfSIFTParam);
                   DescribeRegions(temp_kp1_desc,
-                                  temp_img1, HalfSIFTdesc,
+                                  temp_img1, &HalfSIFTdesc,
                                   desc_par.HalfSIFTParam.PEParam.mrSize,
                                   desc_par.HalfSIFTParam.PEParam.patchSize,
                                   desc_par.HalfSIFTParam.PEParam.FastPatchExtraction,
@@ -729,7 +729,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor SIFTdesc(desc_par.SIFTParam);
                   DescribeRegions(temp_kp1_desc,
-                                  temp_img1, SIFTdesc,
+                                  temp_img1, &SIFTdesc,
                                   desc_par.SIFTParam.PEParam.mrSize,
                                   desc_par.SIFTParam.PEParam.patchSize,
                                   desc_par.SIFTParam.PEParam.FastPatchExtraction,
@@ -739,7 +739,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   PIXELSDescriptor PixelDesc(desc_par.PixelsParam);
                   DescribeRegions(temp_kp1_desc,
-                                  temp_img1, PixelDesc,
+                                  temp_img1, &PixelDesc,
                                   desc_par.PixelsParam.PEParam.mrSize,
                                   desc_par.PixelsParam.PEParam.patchSize,
                                   desc_par.PixelsParam.PEParam.FastPatchExtraction,

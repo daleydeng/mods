@@ -801,4 +801,94 @@ void linH(double x, double y, double *H, double *linearH)
   linearH[3]=a22;
 }
 
+//Detects orientation of the affine region and adds regions with detected orientation to the list.
+//All points that derived from one have the same parent_id
+
+void DescribeRegions(AffineRegionVector &in_kp_list,
+                     SynthImage &img, DescriptorFunctor *descriptor,
+                     double mrSize, int patchSize, bool fast_extraction, bool photoNorm)
+//Describes region with SIFT or other descriptor
+{
+ // std::cerr << "photonorm=" << photoNorm << std::endl;
+  std::vector<unsigned char> workspace;
+  unsigned int i;
+  // patch size in the image / patch size -> amount of down/up sampling
+  cv::Mat patch(patchSize, patchSize, CV_32FC1);
+  unsigned int n_descs = in_kp_list.size();
+  cv::Mat mask(patchSize,patchSize,CV_32F);
+  computeCircularGaussMask(mask);
+  if ( !fast_extraction) {
+    for (i = 0; i < n_descs; i++) {
+      float mrScale = ceil(in_kp_list[i].det_kp.s * mrSize); // half patch size in pixels of image
+
+      int patchImageSize = 2 * int(mrScale) + 1; // odd size
+      float imageToPatchScale = float(patchImageSize) / float(patchSize);  // patch size in the image / patch size -> amount of down/up sampling
+      // is patch touching boundary? if yes, ignore this feature
+      if (imageToPatchScale > 0.4) {
+        // the pixels in the image are 0.4 apart + the affine deformation
+        // leave +1 border for the bilinear interpolation
+        patchImageSize += 2;
+        size_t wss = patchImageSize * patchImageSize * sizeof(float);
+        if (wss >= workspace.size())
+          workspace.resize(wss);
+
+        Mat smoothed(patchImageSize, patchImageSize, CV_32FC1, (void *) &workspace.front());
+        // interpolate with det == 1
+        interpolate(img.pixels,
+                    (float) in_kp_list[i].det_kp.x,
+                    (float) in_kp_list[i].det_kp.y,
+                    (float) in_kp_list[i].det_kp.a11,
+                    (float) in_kp_list[i].det_kp.a12,
+                    (float) in_kp_list[i].det_kp.a21,
+                    (float) in_kp_list[i].det_kp.a22,
+                    smoothed);
+
+        gaussianBlurInplace(smoothed, 1.5f * imageToPatchScale);
+        // subsample with corresponding scale
+        interpolate(smoothed, (float) (patchImageSize >> 1), (float) (patchImageSize >> 1),
+                    imageToPatchScale, 0, 0, imageToPatchScale, patch);
+      } else {
+        // if imageToPatchScale is small (i.e. lot of oversampling), affine normalize without smoothing
+        interpolate(img.pixels,
+                    (float) in_kp_list[i].det_kp.x,
+                    (float) in_kp_list[i].det_kp.y,
+                    (float) in_kp_list[i].det_kp.a11 * imageToPatchScale,
+                    (float) in_kp_list[i].det_kp.a12 * imageToPatchScale,
+                    (float) in_kp_list[i].det_kp.a21 * imageToPatchScale,
+                    (float) in_kp_list[i].det_kp.a22 * imageToPatchScale,
+                    patch);
+
+      }
+      if (photoNorm) {
+          float mean, var;
+          photometricallyNormalize(patch, mask, mean, var);
+        }
+      (*descriptor)(patch, in_kp_list[i].desc.vec);
+      in_kp_list[i].desc.type = descriptor->type;
+    }
+  } else {
+    for (i = 0; i < n_descs; i++) {
+      double mrScale = (double) mrSize * in_kp_list[i].det_kp.s; // half patch size in pixels of image
+      int patchImageSize = 2 * int(mrScale) + 1; // odd size
+      double imageToPatchScale = double(patchImageSize) / (double) patchSize;
+      float curr_sc = imageToPatchScale;
+
+      interpolate(img.pixels,
+                  (float) in_kp_list[i].det_kp.x,
+                  (float) in_kp_list[i].det_kp.y,
+                  (float) in_kp_list[i].det_kp.a11 * curr_sc,
+                  (float) in_kp_list[i].det_kp.a12 * curr_sc,
+                  (float) in_kp_list[i].det_kp.a21 * curr_sc,
+                  (float) in_kp_list[i].det_kp.a22 * curr_sc,
+                  patch);
+      if (photoNorm) {
+          float mean, var;
+          photometricallyNormalize(patch, mask, mean, var);
+        }
+      (*descriptor)(patch, in_kp_list[i].desc.vec);
+      in_kp_list[i].desc.type = descriptor->type;
+    }
+  }
+}
+
 } //namespace mods
