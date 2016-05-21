@@ -17,13 +17,15 @@
 //#include <stdio.h>
 
 #include "ary.h"
-#include "extremaConfig.h"
-#include "extremaParams.h"
+#include "../../../common.hpp"
+#include "extremaTypes.h"
 
 using namespace std;
 
 namespace extrema
 {
+  using mods::ExtremaParams;
+
   //! A structure that holds coordinates of a point in BoundaryRegion i.e. the boundary representation of a region.
   struct BoundaryPoint
   {

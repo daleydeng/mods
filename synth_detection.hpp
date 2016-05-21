@@ -5,10 +5,8 @@
 /*------------------------------------------------------*/
 #undef __STRICT_ANSI__
 
-#include "helpers.h"
-#include "detectors_parameters.hpp"
-#include "descriptors_parameters.hpp"
 #include <sys/time.h>
+#include "common.hpp"
 
 namespace mods {
 
@@ -55,38 +53,8 @@ void GenerateSynthImageCorr(const cv::Mat &in_img,
 //Function generates scaled, rotated and tilted image from image and homography matrix from original to generated image and places all this into SynthImage structure
 
 
-template<typename T, typename params>
-int DetectAffineRegions(SynthImage &img, AffineRegionVector &keypoints, params par, detector_type det_type, int (*detector)(cv::Mat &input, std::vector<T> &out,const params &par,ScalePyramid &scale_pyramid, double tilt, double zoom))
+int DetectAffineRegions(vector<AffineKeypoint> &aff_keys, AffineRegionVector &keypoints, detector_type det_type, int img_id);
 //Function detects affine regions using detector function and writes them into AffineRegionVector structure
-{
-  keypoints.clear();
-  int region_nr=0;
-  std::vector<T> out1;
-  region_nr=detector(img.pixels, out1, par, img.pyramid, img.tilt, img.zoom);
-  auto ptr = out1.begin();
-  keypoints.reserve(region_nr);
-  AffineRegion ar;
-  ar.img_id=img.id;
-  ar.img_reproj_id= 0;
-  ar.type= det_type;
-
-  for (int i = 0; i < region_nr; i++, ptr++)
-  {
-    ar.id = i;
-    ar.det_kp.s=ptr->s * sqrt(fabs(ptr->a11 * ptr->a22 - ptr->a12 * ptr->a21));
-    rectifyTransformation(ptr->a11,ptr->a12,ptr->a21,ptr->a22);
-    ar.det_kp.x = ptr->x;
-    ar.det_kp.y = ptr->y;
-    ar.det_kp.a11 = ptr->a11;
-    ar.det_kp.a12 = ptr->a12;
-    ar.det_kp.a21 = ptr->a21;
-    ar.det_kp.a22 = ptr->a22;
-    ar.det_kp.response = ptr->response;
-    ar.det_kp.sub_type = ptr->sub_type;
-    keypoints.push_back(ar);
-  }
-  return region_nr;
-}
 
 int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, double mrSize = 3.0*sqrt(3.0));
 //Function reprojects detected regions to other image ("original") using H matrix (H is from original to tilted).

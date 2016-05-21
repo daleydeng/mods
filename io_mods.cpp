@@ -53,7 +53,7 @@ void WriteTimeLog(TimeLog log, ostream &out,
     }
 }
 
-void GetMSERPars(extrema::ExtremaParams &MSERPars, INIReader &reader,const char* section)
+void GetMSERPars(ExtremaParams &MSERPars, INIReader &reader,const char* section)
 {
   MSERPars.rel_threshold = reader.GetDouble(section, "relativeThreshold", MSERPars.rel_threshold);
   MSERPars.rel_reg_number = reader.GetDouble(section, "relativeRegionsNumber", MSERPars.rel_reg_number);

@@ -1,12 +1,9 @@
-//
-// Created by old-ufo on 5/2/15.
-//
-#ifndef MODS_NEW_PIXELSDESC_HPP
-#define MODS_NEW_PIXELSDESC_HPP
-#include "structures.hpp"
+#ifndef MODS_PIXEL_DESC_HPP
+#define MODS_PIXEL_DESC_HPP
+
+#include "common.hpp"
 
 namespace mods {
-
 template <typename Container>
 struct compare_indirect_index_ascend  {
   const Container& container;
@@ -41,25 +38,6 @@ void sort_idxs(const std::vector<Dtype> &v,
     }
   return;
 }
-
-
-struct PIXELSDescriptorParams
-{
-    PatchExtractionParams PEParam;
-//  int patchSize;
-//  double mrSize;
-//  bool FastPatchExtraction;
-  std::string normType;
-//  bool photoNorm;
-  PIXELSDescriptorParams()
-  {
-//    patchSize = 41;
-//    mrSize =  3.0*sqrt(3.0);
-//    FastPatchExtraction = false;
-    normType = "L2";
-//    photoNorm =true;
-  }
-};
 
 struct PIXELSDescriptor
 {
@@ -114,5 +92,5 @@ private:
   PIXELSDescriptorParams par;
 };
 
-}//namespace mods
-#endif //MODS_NEW_PIXELSDESC_HPP
+} //namespace mods
+#endif

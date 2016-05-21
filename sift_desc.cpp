@@ -8,7 +8,7 @@
  */
 #undef __STRICT_ANSI__
 #include <vector>
-#include "siftdesc.h"
+#include "sift_desc.hpp"
 #include <iostream>
 using namespace std;
 using cv::Mat;

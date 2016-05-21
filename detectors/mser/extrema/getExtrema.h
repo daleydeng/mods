@@ -7,7 +7,6 @@
 
 #include <LL.h>
 #include <ary.h>
-#include "extremaParams.h"
 #include "extremaTypes.h"
 #include "suballoc.h"
 
@@ -43,7 +42,7 @@
 
 namespace extrema
 {
-
+  using mods::ExtremaParams;
   extern t_thresh_par g_thresh_params;
   extern int g_cols;
 #pragma omp threadprivate (g_cols,g_thresh_params)

@@ -6,33 +6,11 @@
 #define CONFIGURATION_HPP
 
 #include <vector>
+#include "matching.hpp"
 
 #define WITH_ORSA
 
 namespace mods {
-
-//verificator types
-enum RANSAC_mode_t {Homog,Fundamental};
-
-
-//detector types
-const int HESAFF = 0;
-const int DOG = 1;
-const int MSER = 2;
-
-const int MSER_TYPES = 2;
-const int HA_TYPES = 3;
-const int DOG_TYPES = 2;
-const int HAR_TYPES = 2;
-
-const int MODE_RANDOM = 0;
-const int MODE_FGINN = 1;
-const int MODE_DISTANCE = 2;
-const int MODE_BIGGER_REGION = 3;
-
-
-
-
 
 struct drawingParams
 {

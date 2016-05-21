@@ -7,14 +7,15 @@
  *
  */
 
-#undef __STRICT_ANSI__
-#include "helpers.h"
 #include <cmath>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "common.hpp"
 //#include <iostream>
 using cv::Mat;
 using namespace std;
+
+namespace mods {
 
 template <typename ValueType>
 void swap(ValueType *a, ValueType *b)
@@ -23,7 +24,7 @@ void swap(ValueType *a, ValueType *b)
   *a = *b;
   *b = tmp;
 }
-#define CONST1	1.05839816339744830962 //M_PI/4 + 0.273
+#define CONST1  1.05839816339744830962 //M_PI/4 + 0.273
 
 const double M_PI_255 = 255.0/M_PI;
 
@@ -154,8 +155,8 @@ double atan2LUT(double y,double x) //D. Mishkin
       return 0.0;
   }
 }
-# define M_PI_2f		1.57079632679489661923f	/* pi/2 */
-# define M_PIf		3.14159265358979323846f	/* pi */
+# define M_PI_2f                1.57079632679489661923f /* pi/2 */
+# define M_PIf          3.14159265358979323846f /* pi */
 
 float atan2LUTff(float y,float x) //D. Mishkin
 {
@@ -944,3 +945,5 @@ void computeGradientMagnitudeAndOrientation(const Mat &img, Mat &mag, Mat &ori)
 //    outImg = WLD.clone();
 //  }
 //}
+
+}

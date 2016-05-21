@@ -5,9 +5,7 @@
 #include <string>
 #include <map>
 
-#include "structures.hpp"
-#include "detectors_parameters.hpp"
-#include "descriptors_parameters.hpp"
+#include "common.hpp"
 #include "matching.hpp"
 #include "imagerepresentation.hpp"
 

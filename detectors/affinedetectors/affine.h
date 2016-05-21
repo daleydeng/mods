@@ -13,58 +13,9 @@
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "../../helpers.h"
+#include "../../common.hpp"
 
 namespace mods {
-
-/**
- * @brief Possible invariants for Baumberg iteration
- */
-enum AffineBaumbergMethod {
-    AFF_BMBRG_SMM = 0, // Use Second Moment Matrix (original baumberg)
-    AFF_BMBRG_HESSIAN = 1  // Use Hessian matrix
-};
-
-struct AffineShapeParams
-{
-  // number of affine shape interations
-  int maxIterations;
-
-  // convergence threshold, i.e. maximum deviation from isotropic shape at convergence
-  float convergenceThreshold;
-
-  // width and height of the SMM mask
-  int smmWindowSize;
-
-  // width and height of the patch
-  int patchSize;
-
-  // amount of smoothing applied to the initial level of first octave
-  float initialSigma;
-
-  // size of the measurement region (as multiple of the feature scale)
-  float mrSize;
-
-  int   doBaumberg;
-
-  // Invariant used for Baumberg iteration
-  AffineBaumbergMethod affBmbrgMethod;
-  float affMeasRegion;
-
-  AffineShapeParams()
-  {
-    maxIterations = 16;
-    initialSigma = 1.6f;
-    convergenceThreshold = 0.05;
-    patchSize = 41;
-    smmWindowSize = 19;
-    mrSize = 3.0f*sqrt(3.0f);
-    doBaumberg = 1;
-    affBmbrgMethod = AFF_BMBRG_SMM;
-    affMeasRegion = 0.5;
-  }
-};
-
 
 struct AffineShapeCallback
 {

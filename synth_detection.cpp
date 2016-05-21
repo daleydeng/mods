@@ -5,7 +5,7 @@
 #undef __STRICT_ANSI__
 
 #include "synth_detection.hpp"
-#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/opencv.hpp>
 #include "detectors/mser/utls/matrix.h"
 #include "detectors/mser/extrema/extrema.h"
 
@@ -389,6 +389,36 @@ inline void addPeakAngle(const float *hist, vector<float> &angles, int a, int b,
       angles.push_back(2.0f * float(M_PI) * (b + 0.5f + pp) / bins - float(M_PI));
       peak_values.push_back(hist[b]);
     }
+}
+
+int DetectAffineRegions(vector<AffineKeypoint> &aff_keys, AffineRegionVector &keypoints, detector_type det_type, int img_id)
+//Function detects affine regions using detector function and writes them into AffineRegionVector structure
+{
+  int region_nr=aff_keys.size();
+  keypoints.clear();
+  keypoints.reserve(region_nr);
+  auto ptr = aff_keys.begin();
+  AffineRegion ar;
+  ar.img_id=img_id;
+  ar.img_reproj_id= 0;
+  ar.type = det_type;
+
+  for (int i = 0; i < region_nr; i++, ptr++)
+  {
+    ar.id = i;
+    ar.det_kp.s=ptr->s * sqrt(fabs(ptr->a11 * ptr->a22 - ptr->a12 * ptr->a21));
+    rectifyTransformation(ptr->a11,ptr->a12,ptr->a21,ptr->a22);
+    ar.det_kp.x = ptr->x;
+    ar.det_kp.y = ptr->y;
+    ar.det_kp.a11 = ptr->a11;
+    ar.det_kp.a12 = ptr->a12;
+    ar.det_kp.a21 = ptr->a21;
+    ar.det_kp.a22 = ptr->a22;
+    ar.det_kp.response = ptr->response;
+    ar.det_kp.sub_type = ptr->sub_type;
+    keypoints.push_back(ar);
+  }
+  return region_nr;
 }
 
 struct EstimateDominantAnglesFunctor

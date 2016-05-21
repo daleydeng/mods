@@ -5,8 +5,7 @@
 #define MODS_NEW_IO_MODS_H
 
 #include "configuration.hpp"
-#include "detectors_parameters.hpp"
-#include "descriptors_parameters.hpp"
+#include "common.hpp"
 #include "matching.hpp"
 #include "inih/cpp/INIReader.h"
 
@@ -45,7 +44,7 @@ void WriteTimeLog(TimeLog log, ostream &out,
                   const int writeRelValues = 1,
                   const int writeAbsValues = 0,
                   const int writeDescription = 0);
-void GetMSERPars(extrema::ExtremaParams &MSERPars, INIReader &reader,const char* section="MSER");
+void GetMSERPars(ExtremaParams &MSERPars, INIReader &reader,const char* section="MSER");
 void GetORBPars(ORBParams &pars, INIReader &reader,const char* section="ORB");
 void GetReadPars(ReadAffsFromFileParams &pars, INIReader &reader,const char* section="ReadAffs");
 void GetPixelPars(PIXELSDescriptorParams &pars, INIReader &reader,const char* section="PixelDescriptor");

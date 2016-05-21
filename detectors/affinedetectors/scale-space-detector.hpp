@@ -8,8 +8,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include "../../helpers.h"
-#include "../../structures.hpp"
+#include "../../common.hpp"
 #include "pyramid.h"
 #include "affine.h"
 #include <iterator>
@@ -21,15 +20,6 @@ using std::min;
 using std::max;
 
 namespace mods {
-
-struct ScaleSpaceDetectorParams
-{
-  AffineShapeParams AffineShapePars;
-  PyramidParams PyramidPars;
-  ScaleSpaceDetectorParams()
-  {
-  }
-};
 
 struct AffineDetector : public ScaleSpaceDetector, AffineShape, KeypointCallback, AffineShapeCallback, NormalizedPatchCallback
 {

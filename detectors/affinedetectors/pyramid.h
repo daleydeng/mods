@@ -13,8 +13,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "../../helpers.h"
-#include "../../structures.hpp"
+#include "../../common.hpp"
 using cv::Mat;
 
 namespace mods {

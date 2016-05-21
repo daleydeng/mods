@@ -9,14 +9,14 @@
 
 #include "../utls/ecompat.h"
 #include "../utls/timeutls.h"
-#include "../../../structures.hpp"
-#include "../../../helpers.h"
+#include "../../../common.hpp"
 #include "libExtrema.h"
 #include "matrix.h"
 #include "extrema.h"
 
 using namespace std;
 using namespace extrema;
+using namespace mods;
 
 #define MAX_PATH_LEN 1024
 
@@ -279,7 +279,7 @@ int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParam
 
 int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParams &params, ScalePyramid &scale_pyramid, double tilt, double zoom)
 {
-  extrema::ExtremaParams ep;
+  ExtremaParams ep;
   ep = params;
 
   if ((tilt > 2.0) || (zoom < 0.5))

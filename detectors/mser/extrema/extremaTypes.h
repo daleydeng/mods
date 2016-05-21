@@ -7,7 +7,7 @@
 
 #include <LL.h>
 #include <vector>
-#include "extremaConfig.h"
+#include "../../../common.hpp"
 
 #define c_maxByte 256
 
@@ -109,5 +109,19 @@ struct t_sorted_region_threshold
     t_region     *p_r;
     t_thresh_def *p_t;
 };
+
+  //! A structure holding image parameters
+struct ExtremaImage
+{
+    //! Width of the image.
+    unsigned int    width;
+    //! Height of the image.
+    unsigned int    height;
+    //! Number of channels of the image.
+    unsigned int    channels;
+    //! Pointer to image data.
+    unsigned char * data;
+};
+
 }
 #endif

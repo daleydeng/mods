@@ -6,7 +6,6 @@
 #include <string.h>
 #include "optThresh.h"
 #include "getExtrema.h"
-#include "extremaParams.h"
 
 namespace extrema
 {

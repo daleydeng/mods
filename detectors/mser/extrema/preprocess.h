@@ -8,7 +8,6 @@
 #include <math.h>
 #include <ary.h>
 #include "extremaTypes.h"
-#include "extremaParams.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

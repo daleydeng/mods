@@ -1,57 +1,8 @@
-/*
- * Copyright (C) 2008-12 Michal Perdoch
- * All rights reserved.
- *
- * This file is part of the HessianAffine detector and is made available under
- * the terms of the BSD license (see the COPYING file).
- *
- */
-
-// The SIFT descriptor is subject to US Patent 6,711,293
-
-#ifndef MODS_SIFTDESC_H
-#define MODS_SIFTDESC_H
-
-#include <vector>
-
-#include <opencv2/core/core.hpp>
-#include "helpers.h"
-#include "structures.hpp"
+#ifndef MODS_SIFT_DESC_HPP
+#define MODS_SIFT_DESC_HPP
+#include "common.hpp"
 
 namespace mods {
-
-struct SIFTDescriptorParams
-{
-  int spatialBins;
-  int orientationBins;
-  double maxBinValue;
-  int patchSize;
-  char useRootSIFT;
-  bool FastPatchExtraction;
-  int doHalfSIFT;
-  int dims;
-  int maxOrientations;
-  bool estimateOrientation;
-  double orientTh;
-  bool doNorm;
-  PatchExtractionParams PEParam;
-  SIFTDescriptorParams()
-  {
-    spatialBins = 4;
-    orientationBins = 8;
-    maxBinValue = 0.2f;
-    patchSize = 41;
-    useRootSIFT=0;
-    doHalfSIFT = 0;
-    dims = spatialBins*spatialBins*orientationBins;
-    maxOrientations = 0;
-    estimateOrientation= true;
-    doNorm=true;
-    orientTh = 0.8;
-  }
-};
-
-
 struct SIFTDescriptor
 {
 
@@ -104,4 +55,4 @@ private:
 };
 
 } //namespace mods
-#endif //__SIFTDESC_H__
+#endif

@@ -1,10 +1,14 @@
+#include "sift_desc.hpp"
+#include "pixel_desc.hpp"
 #include "imagerepresentation.hpp"
 #include "synth_detection.hpp"
 #include "detectors/mser/extrema/extrema.h"
+#include "detectors/affinedetectors/scale-space-detector.hpp"
 #include <opencv2/features2d/features2d.hpp>
 //#include <opencv2/nonfree/nonfree.hpp>
 //#include <opencv2/nonfree/features2d.hpp>
 #include <fstream>
+#include <iostream>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -602,32 +606,35 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 }
             }
           /// Detection
-
           s_time = getMilliSecs1();
-          if (curr_det.compare("HessianAffine")==0)
-            {
-              DetectAffineRegions(temp_img1, temp_kp1,det_par.HessParam,DET_HESSIAN,DetectAffineKeypoints);
-            }
-          else if (curr_det.compare("DoG")==0)
-            {
-              DetectAffineRegions(temp_img1, temp_kp1,det_par.DoGParam,DET_DOG,DetectAffineKeypoints);
-            }
-          else if (curr_det.compare("HarrisAffine")==0)
-            {
-              DetectAffineRegions(temp_img1, temp_kp1,det_par.HarrParam,DET_HARRIS,DetectAffineKeypoints);
-            }
-          else if (curr_det.compare("MSER")==0)
-            {
-              DetectAffineRegions(temp_img1, temp_kp1,det_par.MSERParam,DET_MSER,DetectMSERs);
-            }
-          else if (curr_det.compare("ORB")==0)
+          std::vector<AffineKeypoint> aff_keys;
+          if (curr_det == "HessianAffine" || curr_det == "DoG" || curr_det == "HarrisAffine") {
+            ScaleSpaceDetectorParams *par;
+            if (curr_det == "HessianAffine")
+              par = &det_par.HessParam;
+            else if (curr_det == "DoG")
+              par = &det_par.DoGParam;
+            else if (curr_det == "HarrisAffine")
+              par = &det_par.HarrParam;
+
+            DetectAffineKeypoints(temp_img1.pixels, aff_keys, *par, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
+            DetectAffineRegions(aff_keys, temp_kp1, par->PyramidPars.DetectorType, temp_img1.id);
+          }
+          else if (curr_det == "MSER")
           {
-              DetectAffineRegions(temp_img1, temp_kp1, det_par.ORBParam, DET_ORB, DetectORBs);
-              if (det_par.ORBParam.doBaumberg) {
-                AffineRegionVector temp_kp_aff;
-                DetectAffineShape(temp_kp1, temp_kp_aff, temp_img1, det_par.BaumbergParam);
-                temp_kp1 = temp_kp_aff;
-              }
+            DetectMSERs(temp_img1.pixels, aff_keys, det_par.MSERParam, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
+            DetectAffineRegions(aff_keys, temp_kp1, DET_MSER, temp_img1.id);
+          }
+          else if (curr_det == "ORB")
+          {
+            DetectORBs(temp_img1.pixels, aff_keys, det_par.ORBParam, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
+            DetectAffineRegions(aff_keys, temp_kp1, DET_ORB, temp_img1.id);
+
+            if (det_par.ORBParam.doBaumberg) {
+              AffineRegionVector temp_kp_aff;
+              DetectAffineShape(temp_kp1, temp_kp_aff, temp_img1, det_par.BaumbergParam);
+              temp_kp1 = temp_kp_aff;
+            }
           }
 
           time1 = ((double)(getMilliSecs1() - s_time))/1000;
