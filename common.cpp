@@ -17,6 +17,17 @@ using namespace std;
 
 namespace mods {
 
+void rectifyTransformation(double &a11, double &a12, double &a21, double &a22)
+{
+  double a = a11, b = a12, c = a21, d = a22;
+  double det = sqrt(fabs(a*d-b*c));
+  double b2a2 = sqrt(b*b + a*a);
+  a11 = b2a2/det;
+  a12 = 0;
+  a21 = (d*b+c*a)/(b2a2*det);
+  a22 = det/b2a2;
+}
+
 template <typename ValueType>
 void swap(ValueType *a, ValueType *b)
 {

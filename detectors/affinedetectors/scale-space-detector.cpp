@@ -8,7 +8,7 @@ using namespace std;
 
 namespace mods {
 
-int DetectAffineKeypoints(cv::Mat &input, vector<AffineKeypoint> &out1,
+int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1,
                           const ScaleSpaceDetectorParams &params,
                           ScalePyramid &scale_pyramid,
                           double tilt, double zoom)
@@ -23,12 +23,16 @@ int DetectAffineKeypoints(cv::Mat &input, vector<AffineKeypoint> &out1,
     {
       p1.doOnWLD = 0;
       p1.doOnNormal = params.PyramidPars.doOnNormal;
-      AffineDetector detector(input, p1, ap);
-      detector.detectPyramidKeypoints(input);
-      detector.exportKeypoints(out1);
-      detector.exportScaleSpace(scale_pyramid);
     }
 
+  AffineDetector detector(input, p1, ap);
+  detector.detectPyramidKeypoints(input);
+  detector.exportKeypoints(out1);
+  detector.exportScaleSpace(scale_pyramid);
+  for (auto &i: out1) {
+    i.s *= sqrt(fabs(i.a11 * i.a22 - i.a12 * i.a21));
+    rectifyTransformation(i.a11, i.a12, i.a21, i.a22);
+  }
   return out1.size();
 }
 

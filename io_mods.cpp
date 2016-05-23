@@ -257,7 +257,7 @@ void GetMatchPars(MatchPars &pars, INIReader &reader, INIReader &iter_reader, co
       iter_reader.GetStringVector("Matching"+IntToStr(i), "SeparateDetectors", currentWhatToMatch.separate_detectors);
       pars.IterWhatToMatch.push_back(currentWhatToMatch);
     }
-  std::vector<std::vector<ViewSynthParameters> > acc_par(DetectorNames.size());
+  //std::vector<std::vector<ViewSynthParameters> > acc_par(DetectorNames.size());
 
   for (int i=0; i<Steps; i++) //Reading parameters
 
@@ -533,7 +533,6 @@ int getCLIparam(configs &conf1,int argc, char **argv)
   conf1.RANSACParam.LAFCoef = ConfigIni.GetInteger("Matching", "LAFcoef", 0);
   conf1.FilterParam.duplicateDist = ConfigIni.GetDouble("DuplicateFiltering", "duplicateDist", 3.0);
   conf1.FilterParam.doBeforeRANSAC = ConfigIni.GetDouble("DuplicateFiltering", "doBeforeRANSAC", 1);
-  conf1.FilterParam.useSCV = ConfigIni.GetInteger("SCV", "useSCV", 0);
   conf1.CLIparams.doCLAHE = ConfigIni.GetInteger("Matching", "doCLAHE", conf1.CLIparams.doCLAHE);
 
 

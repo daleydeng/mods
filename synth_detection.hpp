@@ -18,7 +18,6 @@ inline long getMilliSecs1()
 }
 /// Functions
 
-void rectifyTransformation(double &a11, double &a12, double &a21, double &a22);
 //Rotates ellipse vertically(not the shape, just orientation) and normalizes matrix determinant to one
 
 int SetVSPars (const std::vector <double> &scale_set,
@@ -53,16 +52,16 @@ void GenerateSynthImageCorr(const cv::Mat &in_img,
 //Function generates scaled, rotated and tilted image from image and homography matrix from original to generated image and places all this into SynthImage structure
 
 
-int DetectAffineRegions(vector<AffineKeypoint> &aff_keys, AffineRegionVector &keypoints, detector_type det_type, int img_id);
+vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, vector<AffineKeypoint> &reproj_keys, vector<Descriptor> &descs, detector_type det_type, int img_id);
 //Function detects affine regions using detector function and writes them into AffineRegionVector structure
 
-int ReprojectRegionsAndRemoveTouchBoundary(AffineRegionVector &keypoints, double *H, int orig_w, int orig_h, double mrSize = 3.0*sqrt(3.0));
+int reproject_and_remove_boundary(vector<AffineKeypoint> &keypoints, vector<AffineKeypoint> &reproj_keys, double *H, int orig_w, int orig_h, double mrSize = 3.0*sqrt(3.0));
 //Function reprojects detected regions to other image ("original") using H matrix (H is from original to tilted).
 //Then all regions that are outside original image (fully or partially) are deleted.
 
 
-int DetectOrientation(AffineRegionVector &in_kp_list,
-                      AffineRegionVector &out_kp_list1,
+int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
+                      vector<AffineKeypoint> &out_kp_list1,
                       SynthImage &img,
                       double mrSize = 3.0*sqrt(3.0),
                       int patchSize = 41,
@@ -71,17 +70,15 @@ int DetectOrientation(AffineRegionVector &in_kp_list,
                       double th = 0.8,
                       bool addUpRight = false);
 
-int DetectAffineShape(AffineRegionVector &in_kp_list,
-                      AffineRegionVector &out_kp_list1,
-                      SynthImage &img,
-                      const AffineShapeParams par);
+int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
+                        vector<AffineKeypoint> &out_kp_list1,
+                        SynthImage &img,
+                        const AffineShapeParams par);
 
 //Detects orientation of the affine region and adds regions with detected orientation to the list.
 //All points that derived from one have the same parent_id
 
-void DescribeRegions(AffineRegionVector &in_kp_list,
-                     SynthImage &img, DescriptorFunctor *descriptor,
-                     double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
+void describe_regions(vector<AffineKeypoint> &in_kp_list, vector<Descriptor> &descs, SynthImage &img, DescriptorFunctor *descriptor, double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
 
 void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector& new_kps);
 //Function for getting new regions ID right (original IDs are changed to new ones to ensure no collisions in kp_list)
@@ -99,7 +96,7 @@ void ReadKPs(AffineRegionVector &keys, std::istream &in1);
 //descriptor_size(default = 128) keys_number
 //x y scale a11 a12 a21 a22 desc[descriptor_size]
 
-void ReadKPsMik(AffineRegionVector &keys, std::istream &in1);
+// void ReadKPsMik(AffineRegionVector &keys, std::istream &in1);
 //Function reads keypoints from stream in Mikolajczuk format:
 //descriptor_size(default = 128) keys_number
 //x y scale a b c desc[descriptor_size]

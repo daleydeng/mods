@@ -1,6 +1,5 @@
 #ifndef MODS_COMMON_HPP
 #define MODS_COMMON_HPP
-#undef __STRICT_ANSI__
 
 #include <vector>
 #include <map>
@@ -200,14 +199,12 @@ struct Descriptor
 struct AffineRegion{
 
   int img_id;              //image id, where shape detected
-  int img_reproj_id;   //original untilted image id (always =zero)
   int id;                  //region id
   int parent_id;
   detector_type type;
   AffineKeypoint det_kp;   //affine region in detected image
   AffineKeypoint reproj_kp;//reprojected affine region to the original image
   Descriptor desc;
-
 };
 
 struct PatchExtractionParams {
@@ -654,6 +651,8 @@ struct DescriptorFunctor {
   virtual void operator()(cv::Mat &patch, std::vector<float>& desc) = 0;
   descriptor_type type;
 };
+
+void rectifyTransformation(double &a11, double &a12, double &a21, double &a22);
 
 } //namespace mods
 

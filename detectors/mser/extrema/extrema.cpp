@@ -377,7 +377,10 @@ int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParam
 
     }
 
-
+  for (auto &i: out1) {
+    i.s *= sqrt(fabs(i.a11 * i.a22 - i.a12 * i.a21));
+    rectifyTransformation(i.a11, i.a12, i.a21, i.a22);
+  }
   return out1.size();
 }
 

@@ -195,7 +195,7 @@ std::ostream& operator<<(std::ostream& os, const vector<T>& v)
   return os;
 }
 
-int DetectAffineKeypoints(cv::Mat &input, vector<AffineKeypoint> &out1, const ScaleSpaceDetectorParams &params, ScalePyramid &scale_pyramid, double tilt = 1.0, double zoom = 1.0);
+int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1, const ScaleSpaceDetectorParams &params, ScalePyramid &scale_pyramid, double tilt = 1.0, double zoom = 1.0);
 
 } //namespace mods
 #endif // SCALESPACEDETECTOR_HPP

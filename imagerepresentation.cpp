@@ -28,7 +28,7 @@ void saveKPBench(AffineKeypoint &ak, std::ostream &s) {
 }
 
 void saveAR(AffineRegion &ar, std::ostream &s) {
-  s << ar.id << " " << ar.img_id << " " <<  ar.img_reproj_id << " ";
+  s << ar.id << " " << ar.img_id << " "  << " ";
   s << ar.parent_id <<  " ";
   saveKP(ar.det_kp,s);
   saveKP(ar.reproj_kp,s);
@@ -47,7 +47,7 @@ void loadKP(AffineKeypoint &ak, std::istream &s) {
 }
 
 void loadAR(AffineRegion &ar, std::istream &s) {
-  s >> ar.id >> ar.img_id >> ar.img_reproj_id;
+  s >> ar.id >> ar.img_id;
   s >> ar.parent_id;
   loadKP(ar.det_kp,s);
   loadKP(ar.reproj_kp,s);
@@ -226,124 +226,6 @@ int ImageRepresentation::GetDescriptorDimension(std::string desc_name)
     }
   return dim;
 }
-cv::Mat ImageRepresentation::GetDescriptorsMatByDetDesc(const std::string desc_name,const std::string det_name)
-{
-  unsigned int dim = GetDescriptorDimension(desc_name);
-  unsigned int n_descs = GetDescriptorsNumber(desc_name,det_name);
-
-  cv::Mat descriptors(dim, n_descs, CV_32F);
-  int reg_number = 0;
-
-  std::map<std::string, AffineRegionVectorMap>::iterator regions_it;
-  AffineRegionVectorMap::iterator desc_it;
-
-  if (det_name.compare("All") == 0)
-    {
-      for (regions_it = RegionVectorMap.begin();
-           regions_it != RegionVectorMap.end(); regions_it++)
-        {
-          desc_it = regions_it->second.find(desc_name);
-          if (desc_it != regions_it->second.end() )
-            {
-              AffineRegionVector *currentDescVector = &(desc_it->second);
-              unsigned int curr_size = currentDescVector->size();
-              for (unsigned int i = 0; i<curr_size; i++, reg_number++)
-                {
-                  float* Row = descriptors.ptr<float>(reg_number);
-                  AffineRegion curr_region = (*currentDescVector)[i];
-                  for (unsigned int j = 0; j<dim; j++)
-                    Row[j] = curr_region.desc.vec[j];
-                }
-            }
-        }
-    }
-  else
-    {
-      regions_it = RegionVectorMap.find(det_name);
-      if ( regions_it != RegionVectorMap.end())
-        {
-          desc_it = regions_it->second.find(desc_name);
-          if (desc_it != regions_it->second.end() )
-            {
-              AffineRegionVector *currentDescVector = &(desc_it->second);
-              unsigned int curr_size = currentDescVector->size();
-              for (unsigned int i = 0; i<curr_size; i++, reg_number++)
-                {
-                  float* Row = descriptors.ptr<float>(reg_number);
-                  AffineRegion curr_region = (*currentDescVector)[i];
-                  for (unsigned int j = 0; j<dim; j++)
-                    Row[j] = curr_region.desc.vec[j];
-                }
-            }
-        }
-    }
-  return descriptors;
-}
-
-cv::Mat ImageRepresentation::GetDescriptorsMatByDetDesc(std::vector<cv::Point2f> &coordinates, const std::string desc_name,const std::string det_name)
-{
-  unsigned int dim = GetDescriptorDimension(desc_name);
-  unsigned int n_descs = GetDescriptorsNumber(desc_name,det_name);
-
-  cv::Mat descriptors(dim, n_descs, CV_32F);
-  coordinates.clear();
-  coordinates.reserve(n_descs);
-  int reg_number = 0;
-
-  std::map<std::string, AffineRegionVectorMap>::iterator regions_it;
-  AffineRegionVectorMap::iterator desc_it;
-
-  if (det_name.compare("All") == 0)
-    {
-      for (regions_it = RegionVectorMap.begin();
-           regions_it != RegionVectorMap.end(); regions_it++)
-        {
-          desc_it = regions_it->second.find(desc_name);
-          if (desc_it != regions_it->second.end() )
-            {
-              AffineRegionVector *currentDescVector = &(desc_it->second);
-              unsigned int curr_size = currentDescVector->size();
-              for (unsigned int i = 0; i<curr_size; i++, reg_number++)
-                {
-                  float* Row = descriptors.ptr<float>(reg_number);
-                  AffineRegion curr_region = (*currentDescVector)[i];
-                  cv::Point2f curr_point;
-                  curr_point.x = curr_region.reproj_kp.x;
-                  curr_point.y = curr_region.reproj_kp.y;
-                  coordinates.push_back(curr_point);
-                  for (unsigned int j = 0; j<dim; j++)
-                    Row[j] = curr_region.desc.vec[j];
-                }
-            }
-        }
-    }
-  else
-    {
-      regions_it = RegionVectorMap.find(det_name);
-      if ( regions_it != RegionVectorMap.end())
-        {
-          desc_it = regions_it->second.find(desc_name);
-          if (desc_it != regions_it->second.end() )
-            {
-              AffineRegionVector *currentDescVector = &(desc_it->second);
-              unsigned int curr_size = currentDescVector->size();
-              for (unsigned int i = 0; i<curr_size; i++, reg_number++)
-                {
-                  float* Row = descriptors.ptr<float>(reg_number);
-                  AffineRegion curr_region = (*currentDescVector)[i];
-                  cv::Point2f curr_point;
-                  curr_point.x = curr_region.reproj_kp.x;
-                  curr_point.y = curr_region.reproj_kp.y;
-                  coordinates.push_back(curr_point);
-
-                  for (unsigned int j = 0; j<dim; j++)
-                    Row[j] = curr_region.desc.vec[j];
-                }
-            }
-        }
-    }
-  return descriptors;
-}
 
 AffineRegion ImageRepresentation::GetAffineRegion(std::string desc_name, std::string det_name, int idx)
 {
@@ -460,7 +342,7 @@ void ImageRepresentation::AddRegionsToList(AffineRegionVector &kp_list, AffineRe
 
 static const double mrSizeORB = 3.0;
 
-int DetectORBs(cv::Mat &input, std::vector<AffineKeypoint> &out1, const ORBParams &params, ScalePyramid &scale_pyramid, double tilt = 1.0, double zoom = 1.0) {
+int detect_orbs(cv::Mat &input, std::vector<AffineKeypoint> &out1, const ORBParams &params, ScalePyramid &scale_pyramid, double tilt = 1.0, double zoom = 1.0) {
   std::vector<cv::KeyPoint> keys;
   auto det = cv::ORB::create(
       params.nfeatures,
@@ -495,7 +377,7 @@ int DetectORBs(cv::Mat &input, std::vector<AffineKeypoint> &out1, const ORBParam
   return kp_size;
 }
 
-void DescribeORBs(AffineRegionVector &aff_descs, cv::Mat &input, ORBParams &param, int w0, int h0) {
+void describe_ORBs(vector<AffineKeypoint> &aff_keys, vector<Descriptor> descs, cv::Mat &input, ORBParams &param) {
   auto det = cv::ORB::create(
       param.nfeatures,
       param.scaleFactor,
@@ -512,30 +394,36 @@ void DescribeORBs(AffineRegionVector &aff_descs, cv::Mat &input, ORBParams &para
   input.convertTo(img, CV_8U);
   det->detectAndCompute(img, mask, keys, descriptors);
   int kp_size = keys.size();
-  int desc_size = descriptors.cols;
+  descs.resize(kp_size);
+  int desc_dim = descriptors.cols;
 
-  aff_descs.resize(kp_size);
-  for (int kp_num = 0; kp_num < kp_size; kp_num++) {
-    auto &aff_desc = aff_descs[kp_num];
-    auto &key = keys[kp_num];
+  aff_keys.resize(kp_size);
+  for (int i = 0; i < kp_size; i++) {
+    auto &aff_key = aff_keys[i];
+    auto &key = keys[i];
+    auto &desc = descs[i];
+    aff_key.x = key.pt.x;
+    aff_key.y = key.pt.y;
+    aff_key.a11 = cos(key.angle * M_PI / 180.0);
+    aff_key.a12 = sin(key.angle * M_PI / 180.0);
+    aff_key.a21 = -sin(key.angle * M_PI / 180.0);
+    aff_key.a22 = cos(key.angle * M_PI / 180.0);
+    aff_key.s = key.size / mrSizeORB;
+    aff_key.response = key.response;
 
-    aff_desc.det_kp.x = key.pt.x;
-    aff_desc.det_kp.y = key.pt.y;
-    aff_desc.det_kp.a11 = cos(key.angle * M_PI / 180.0);
-    aff_desc.det_kp.a12 = sin(key.angle * M_PI / 180.0);
-    aff_desc.det_kp.a21 = -sin(key.angle * M_PI / 180.0);
-    aff_desc.det_kp.a22 = cos(key.angle * M_PI / 180.0);
-    aff_desc.det_kp.s = key.size / mrSizeORB;
-    aff_desc.det_kp.response = key.response;
-    aff_desc.type = DET_ORB;
-    aff_desc.desc.type = DESC_ORB;
-    aff_desc.desc.vec.resize(desc_size);
+    desc.type = DESC_ORB;
+    desc.vec.resize(desc_dim);
 
-    unsigned char *descPtr = descriptors.ptr<unsigned char>(kp_num);
-    for (int jj = 0; jj < desc_size; jj++, descPtr++)
-      aff_desc.desc.vec[jj] = (float) *descPtr;
+    unsigned char *descPtr = descriptors.ptr<unsigned char>(i);
+    for (int jj = 0; jj < desc_dim; jj++, descPtr++)
+      desc.vec[jj] = (float) *descPtr;
   }
+}
 
+vector<AffineRegion> reproject_clean_to_affine_regions(vector<AffineKeypoint> &keys, vector<Descriptor> &descs, detector_type det_type, int img_id, double *H, int w, int h, double mrSize) {
+  vector<AffineKeypoint> reproj_kps;
+  reproject_and_remove_boundary(keys, reproj_kps, H, w, h, mrSize);
+  return convert_affine_regions(keys, reproj_kps, descs, det_type, img_id);
 }
 
 void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisParam &synth_par,
@@ -580,8 +468,6 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
         {
           ///Synthesis
           long s_time = getMilliSecs1();
-          AffineRegionVector temp_kp1;
-          AffineRegionVectorMap temp_kp_map;
           SynthImage temp_img1;
           GenerateSynthImageCorr(gray_in_img, temp_img1, Name.c_str(),
                                  synth_par[curr_det][synth].tilt,
@@ -607,7 +493,8 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
             }
           /// Detection
           s_time = getMilliSecs1();
-          std::vector<AffineKeypoint> aff_keys;
+          std::vector<AffineKeypoint> aff_keys, reproj_aff_keys;
+          detector_type det_type;
           if (curr_det == "HessianAffine" || curr_det == "DoG" || curr_det == "HarrisAffine") {
             ScaleSpaceDetectorParams *par;
             if (curr_det == "HessianAffine")
@@ -618,55 +505,58 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
               par = &det_par.HarrParam;
 
             DetectAffineKeypoints(temp_img1.pixels, aff_keys, *par, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
-            DetectAffineRegions(aff_keys, temp_kp1, par->PyramidPars.DetectorType, temp_img1.id);
+            det_type = par->PyramidPars.DetectorType;
           }
           else if (curr_det == "MSER")
           {
             DetectMSERs(temp_img1.pixels, aff_keys, det_par.MSERParam, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
-            DetectAffineRegions(aff_keys, temp_kp1, DET_MSER, temp_img1.id);
+            det_type = DET_MSER;
           }
           else if (curr_det == "ORB")
           {
-            DetectORBs(temp_img1.pixels, aff_keys, det_par.ORBParam, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
-            DetectAffineRegions(aff_keys, temp_kp1, DET_ORB, temp_img1.id);
+            detect_orbs(temp_img1.pixels, aff_keys, det_par.ORBParam, temp_img1.pyramid, temp_img1.tilt, temp_img1.zoom);
 
             if (det_par.ORBParam.doBaumberg) {
-              AffineRegionVector temp_kp_aff;
-              DetectAffineShape(temp_kp1, temp_kp_aff, temp_img1, det_par.BaumbergParam);
-              temp_kp1 = temp_kp_aff;
+              vector<AffineKeypoint> temp_aff_keys;
+              detect_affine_shape(aff_keys, temp_aff_keys, temp_img1, det_par.BaumbergParam);
+              aff_keys = temp_aff_keys;
             }
+            det_type = DET_ORB;
           }
+
+          vector<Descriptor> empty_descs;
+          AffineRegionVectorMap temp_kp_map;
+          temp_kp_map["None"] = reproject_clean_to_affine_regions(aff_keys, empty_descs, det_type, temp_img1.id, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.);
 
           time1 = ((double)(getMilliSecs1() - s_time))/1000;
           TimeSpent.DetectTime += time1;
 
           //
           /// Orientation estimation
-          AffineRegionVector temp_kp1_SIFT_like_desc;
-          AffineRegionVector temp_kp1_HalfSIFT_like_desc;
-          AffineRegionVector temp_kp1_upright;
+          vector<AffineKeypoint> temp_kp1_SIFT_like_desc;
+          vector<AffineKeypoint> temp_kp1_HalfSIFT_like_desc;
+          vector<AffineKeypoint> temp_kp1_upright;
 
           if (present_SIFT_like_desc) {
-              DetectOrientation(temp_kp1, temp_kp1_SIFT_like_desc, temp_img1,
+              detect_orientation(aff_keys, temp_kp1_SIFT_like_desc, temp_img1,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (present_HalfSIFT_like_desc) {
-              DetectOrientation(temp_kp1, temp_kp1_HalfSIFT_like_desc, temp_img1,
+              detect_orientation(aff_keys, temp_kp1_HalfSIFT_like_desc, temp_img1,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 true, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (dom_ori_par.addUpRight) {
-              DetectOrientation(temp_kp1, temp_kp1_upright, temp_img1,
+              detect_orientation(aff_keys, temp_kp1_upright, temp_img1,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, 0, 1.0, true);
             }
-          ReprojectRegionsAndRemoveTouchBoundary(temp_kp1, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.0);
 
-          temp_kp_map["None"] = temp_kp1;
           // Description
+
           time1 = ((double) (getMilliSecs1() - s_time)) / 1000;
           TimeSpent.OrientTime += time1;
           s_time = getMilliSecs1();
@@ -674,29 +564,26 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
 
           for (unsigned int i_desc=0; i_desc < synth_par[curr_det][synth].descriptors.size();i_desc++) {
               std::string curr_desc = synth_par[curr_det][synth].descriptors[i_desc];
-              AffineRegionVector temp_kp1_desc;
-
-              temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_upright.begin(), temp_kp1_upright.end());
+              vector<AffineKeypoint> temp_kp1_desc, temp_reproj_kp1_desc;
+              vector<Descriptor> temp_kp1_desc_desc;
 
               //Add oriented and upright keypoints if any
               if (curr_desc.find("Half") != std::string::npos) {
-                  temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_HalfSIFT_like_desc.begin(),
-                                       temp_kp1_HalfSIFT_like_desc.end());
-                } else {
-                  temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_SIFT_like_desc.begin(), temp_kp1_SIFT_like_desc.end());
-                }
+                  temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_HalfSIFT_like_desc.begin(), temp_kp1_HalfSIFT_like_desc.end());
+              } else {
+                temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_SIFT_like_desc.begin(), temp_kp1_SIFT_like_desc.end());
+              }
               // Add upright if detected
               temp_kp1_desc.insert(temp_kp1_desc.end(), temp_kp1_upright.begin(), temp_kp1_upright.end());
 
-
-              ReprojectRegionsAndRemoveTouchBoundary(temp_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows);
+              reproject_and_remove_boundary(temp_kp1_desc, temp_reproj_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows);
 
               ///Description
 
               if (curr_desc.compare("RootSIFT") == 0) //RootSIFT
                 {
                   SIFTDescriptor RootSIFTdesc(desc_par.RootSIFTParam);
-                  DescribeRegions(temp_kp1_desc,
+                  describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
                                   temp_img1, &RootSIFTdesc,
                                   desc_par.RootSIFTParam.PEParam.mrSize,
                                   desc_par.RootSIFTParam.PEParam.patchSize,
@@ -706,7 +593,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
               else if (curr_desc.compare("HalfRootSIFT") == 0) //HalfRootSIFT
                 {
                   SIFTDescriptor HalfRootSIFTdesc(desc_par.HalfRootSIFTParam);
-                  DescribeRegions(temp_kp1_desc,
+                  describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
                                   temp_img1, &HalfRootSIFTdesc,
                                   desc_par.HalfRootSIFTParam.PEParam.mrSize,
                                   desc_par.HalfRootSIFTParam.PEParam.patchSize,
@@ -717,7 +604,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   ///Description
                   SIFTDescriptor HalfSIFTdesc(desc_par.HalfSIFTParam);
-                  DescribeRegions(temp_kp1_desc,
+                  describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
                                   temp_img1, &HalfSIFTdesc,
                                   desc_par.HalfSIFTParam.PEParam.mrSize,
                                   desc_par.HalfSIFTParam.PEParam.patchSize,
@@ -728,7 +615,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
               else if (curr_desc.compare("SIFT") == 0) //SIFT
                 {
                   SIFTDescriptor SIFTdesc(desc_par.SIFTParam);
-                  DescribeRegions(temp_kp1_desc,
+                  describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
                                   temp_img1, &SIFTdesc,
                                   desc_par.SIFTParam.PEParam.mrSize,
                                   desc_par.SIFTParam.PEParam.patchSize,
@@ -738,7 +625,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
               else if (curr_desc.compare("Pixels") == 0) //Raw Pixels
                 {
                   PIXELSDescriptor PixelDesc(desc_par.PixelsParam);
-                  DescribeRegions(temp_kp1_desc,
+                  describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
                                   temp_img1, &PixelDesc,
                                   desc_par.PixelsParam.PEParam.mrSize,
                                   desc_par.PixelsParam.PEParam.patchSize,
@@ -747,11 +634,13 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 }
               else if (curr_desc.compare("ORB") == 0) //ORB (not uses orientation estimated points)
               {
-                DescribeORBs(temp_kp1_desc, temp_img1.pixels, det_par.ORBParam, OriginalImg.cols, OriginalImg.rows);
-                ReprojectRegionsAndRemoveTouchBoundary(temp_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, mrSizeORB);
+                describe_ORBs(temp_kp1_desc, temp_kp1_desc_desc, temp_img1.pixels, det_par.ORBParam);
+                reproject_and_remove_boundary(temp_kp1_desc, temp_reproj_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, mrSizeORB);
               }
 
-              temp_kp_map[curr_desc] = temp_kp1_desc;
+
+              reproject_and_remove_boundary(temp_kp1_desc, temp_reproj_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.0);
+              temp_kp_map[curr_desc] = convert_affine_regions(temp_kp1_desc, temp_reproj_kp1_desc, temp_kp1_desc_desc, det_type, temp_img1.id);
 
               time1 = ((double)(getMilliSecs1() - s_time)) / 1000;
               TimeSpent.DescTime += time1;
@@ -760,7 +649,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
           OneDetectorKeypointsMapVector[synth] = temp_kp_map;
         }
       for (unsigned int synth=0; synth < n_synths; synth++)
-        AddRegions(OneDetectorKeypointsMapVector[synth],curr_det);
+        AddRegions(OneDetectorKeypointsMapVector[synth], curr_det);
     }
 }
 

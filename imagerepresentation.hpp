@@ -23,9 +23,6 @@ public:
   int GetDescriptorDimension(std::string desc_name);
   int GetRegionsNumber(std::string det_name = "All");
   int GetDescriptorsNumber(std::string desc_name = "All", std::string det_name = "All");
-  cv::Mat GetDescriptorsMatByDetDesc(const std::string desc_name,const std::string det_name = "All");
-  cv::Mat GetDescriptorsMatByDetDesc(std::vector<cv::Point2f> &coordinates,
-                                     const std::string desc_name,const std::string det_name = "All");
   AffineRegionVector GetAffineRegionVector(std::string desc_name, std::string det_name, std::vector<int> idxs);
   AffineRegionVector GetAffineRegionVector(std::string desc_name, std::string det_name);
   AffineRegion GetAffineRegion(std::string desc_name, std::string det_name, int idx);

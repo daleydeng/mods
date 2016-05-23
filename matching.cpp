@@ -761,7 +761,6 @@ void DrawMatches(const cv::Mat &in_img1,const cv::Mat &in_img2, cv::Mat &out_img
                  const int r1,
                  const int r2,
                  const int drawEpipolarLines,
-                 const int useSCV,
                  const double LAFcoef,
                  const cv::Scalar color1,
                  const cv::Scalar color2)
