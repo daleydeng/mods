@@ -191,11 +191,8 @@ struct ViewSynthParameters
 
 typedef std::map<std::string, std::vector<ViewSynthParameters> > IterationViewsynthesisParam;
 
-struct Descriptor
-{
-  descriptor_type type;
-  std::vector<float> vec;
-};
+typedef std::vector<float> descriptor_t;
+
 struct AffineRegion{
 
   int img_id;              //image id, where shape detected
@@ -204,7 +201,8 @@ struct AffineRegion{
   detector_type type;
   AffineKeypoint det_kp;   //affine region in detected image
   AffineKeypoint reproj_kp;//reprojected affine region to the original image
-  Descriptor desc;
+  descriptor_type desc_type;
+  descriptor_t desc;
 };
 
 struct PatchExtractionParams {

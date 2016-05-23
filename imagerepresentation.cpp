@@ -33,9 +33,9 @@ void saveAR(AffineRegion &ar, std::ostream &s) {
   saveKP(ar.det_kp,s);
   saveKP(ar.reproj_kp,s);
   // s << ar.desc.type <<
-  s << " " << ar.desc.vec.size() << " ";
-  for (unsigned int i = 0; i < ar.desc.vec.size(); ++i) {
-      s << ar.desc.vec[i] << " ";
+  s << " " << ar.desc.size() << " ";
+  for (unsigned int i = 0; i < ar.desc.size(); ++i) {
+      s << ar.desc[i] << " ";
     }
 }
 void saveARBench(AffineRegion &ar, std::ostream &s, std::ostream &s2) {
@@ -54,9 +54,9 @@ void loadAR(AffineRegion &ar, std::istream &s) {
   //  s >> ar.desc.type;
   int size1;
   s >> size1;
-  ar.desc.vec.resize(size1);
-  for (unsigned int i = 0; i < ar.desc.vec.size(); ++i) {
-      s >> ar.desc.vec[i];
+  ar.desc.resize(size1);
+  for (unsigned int i = 0; i < ar.desc.size(); ++i) {
+      s >> ar.desc[i];
     }
 }
 void L2normalize(const float* input_arr, int size, std::vector<float> &output_vect)
@@ -220,7 +220,7 @@ int ImageRepresentation::GetDescriptorDimension(std::string desc_name)
       if (desc_it != regions_it->second.end() )
         if (desc_it->second.size() > 0)
           {
-            dim = desc_it->second[0].desc.vec.size();
+            dim = desc_it->second[0].desc.size();
             break;
           }
     }
@@ -377,7 +377,7 @@ int detect_orbs(cv::Mat &input, std::vector<AffineKeypoint> &out1, const ORBPara
   return kp_size;
 }
 
-void describe_ORBs(vector<AffineKeypoint> &aff_keys, vector<Descriptor> descs, cv::Mat &input, ORBParams &param) {
+void describe_ORBs(vector<AffineKeypoint> &aff_keys, vector<descriptor_t> descs, cv::Mat &input, ORBParams &param) {
   auto det = cv::ORB::create(
       param.nfeatures,
       param.scaleFactor,
@@ -411,19 +411,18 @@ void describe_ORBs(vector<AffineKeypoint> &aff_keys, vector<Descriptor> descs, c
     aff_key.s = key.size / mrSizeORB;
     aff_key.response = key.response;
 
-    desc.type = DESC_ORB;
-    desc.vec.resize(desc_dim);
+    desc.resize(desc_dim);
 
     unsigned char *descPtr = descriptors.ptr<unsigned char>(i);
     for (int jj = 0; jj < desc_dim; jj++, descPtr++)
-      desc.vec[jj] = (float) *descPtr;
+      desc[jj] = (float) *descPtr;
   }
 }
 
-vector<AffineRegion> reproject_clean_to_affine_regions(vector<AffineKeypoint> &keys, vector<Descriptor> &descs, detector_type det_type, int img_id, double *H, int w, int h, double mrSize) {
+vector<AffineRegion> reproject_clean_to_affine_regions(vector<AffineKeypoint> &keys, vector<descriptor_t> &descs, detector_type det_type, descriptor_type desc_type, int img_id, double *H, int w, int h, double mrSize) {
   vector<AffineKeypoint> reproj_kps;
   reproject_and_remove_boundary(keys, reproj_kps, H, w, h, mrSize);
-  return convert_affine_regions(keys, reproj_kps, descs, det_type, img_id);
+  return convert_affine_regions(keys, reproj_kps, descs, det_type, desc_type, img_id);
 }
 
 void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisParam &synth_par,
@@ -524,9 +523,9 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
             det_type = DET_ORB;
           }
 
-          vector<Descriptor> empty_descs;
+          vector<descriptor_t> empty_descs;
           AffineRegionVectorMap temp_kp_map;
-          temp_kp_map["None"] = reproject_clean_to_affine_regions(aff_keys, empty_descs, det_type, temp_img1.id, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.);
+          temp_kp_map["None"] = reproject_clean_to_affine_regions(aff_keys, empty_descs, det_type, DESC_UNKNOWN, temp_img1.id, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.);
 
           time1 = ((double)(getMilliSecs1() - s_time))/1000;
           TimeSpent.DetectTime += time1;
@@ -565,7 +564,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
           for (unsigned int i_desc=0; i_desc < synth_par[curr_det][synth].descriptors.size();i_desc++) {
               std::string curr_desc = synth_par[curr_det][synth].descriptors[i_desc];
               vector<AffineKeypoint> temp_kp1_desc, temp_reproj_kp1_desc;
-              vector<Descriptor> temp_kp1_desc_desc;
+              vector<descriptor_t> temp_kp1_desc_desc;
 
               //Add oriented and upright keypoints if any
               if (curr_desc.find("Half") != std::string::npos) {
@@ -580,6 +579,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
 
               ///Description
 
+              descriptor_type desc_type;
               if (curr_desc.compare("RootSIFT") == 0) //RootSIFT
                 {
                   SIFTDescriptor RootSIFTdesc(desc_par.RootSIFTParam);
@@ -589,6 +589,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.RootSIFTParam.PEParam.patchSize,
                                   desc_par.RootSIFTParam.PEParam.FastPatchExtraction,
                                   desc_par.RootSIFTParam.PEParam.photoNorm);
+                  desc_type = DESC_ROOT_SIFT;
                 }
               else if (curr_desc.compare("HalfRootSIFT") == 0) //HalfRootSIFT
                 {
@@ -599,6 +600,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.HalfRootSIFTParam.PEParam.patchSize,
                                   desc_par.HalfRootSIFTParam.PEParam.FastPatchExtraction,
                                   desc_par.HalfRootSIFTParam.PEParam.photoNorm);
+                  desc_type = DESC_HALF_ROOT_SIFT;
                 }
               else if (curr_desc.compare("HalfSIFT") == 0) //HalfSIFT
                 {
@@ -610,6 +612,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.HalfSIFTParam.PEParam.patchSize,
                                   desc_par.HalfSIFTParam.PEParam.FastPatchExtraction,
                                   desc_par.HalfSIFTParam.PEParam.photoNorm);
+                  desc_type = DESC_HALF_SIFT;
                 }
 
               else if (curr_desc.compare("SIFT") == 0) //SIFT
@@ -621,6 +624,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.SIFTParam.PEParam.patchSize,
                                   desc_par.SIFTParam.PEParam.FastPatchExtraction,
                                   desc_par.SIFTParam.PEParam.photoNorm);
+                  desc_type = DESC_SIFT;
                 }
               else if (curr_desc.compare("Pixels") == 0) //Raw Pixels
                 {
@@ -631,16 +635,17 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                                   desc_par.PixelsParam.PEParam.patchSize,
                                   desc_par.PixelsParam.PEParam.FastPatchExtraction,
                                   desc_par.PixelsParam.PEParam.photoNorm);
+                  desc_type = DESC_PIXELS;
                 }
               else if (curr_desc.compare("ORB") == 0) //ORB (not uses orientation estimated points)
               {
                 describe_ORBs(temp_kp1_desc, temp_kp1_desc_desc, temp_img1.pixels, det_par.ORBParam);
                 reproject_and_remove_boundary(temp_kp1_desc, temp_reproj_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, mrSizeORB);
+                desc_type = DESC_ORB;
               }
 
-
               reproject_and_remove_boundary(temp_kp1_desc, temp_reproj_kp1_desc, temp_img1.H, OriginalImg.cols, OriginalImg.rows, 3.0);
-              temp_kp_map[curr_desc] = convert_affine_regions(temp_kp1_desc, temp_reproj_kp1_desc, temp_kp1_desc_desc, det_type, temp_img1.id);
+              temp_kp_map[curr_desc] = convert_affine_regions(temp_kp1_desc, temp_reproj_kp1_desc, temp_kp1_desc_desc, det_type, desc_type, temp_img1.id);
 
               time1 = ((double)(getMilliSecs1() - s_time)) / 1000;
               TimeSpent.DescTime += time1;
@@ -670,7 +675,7 @@ void ImageRepresentation::SaveRegions(std::string fname, int mode) {
                   kpfile << desc_it->first << " " << desc_it->second.size() << std::endl;
                   int n_desc = desc_it->second.size();
                   if (n_desc > 0) {
-                      kpfile << (desc_it->second)[0].desc.vec.size() << std::endl;
+                      kpfile << (desc_it->second)[0].desc.size() << std::endl;
                     } else {
                       std::cerr << "No descriptor " << desc_it->first << std::endl;
                     }

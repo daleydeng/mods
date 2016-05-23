@@ -319,7 +319,7 @@ int MatchFlannFGINN(const AffineRegionVector &list1, const AffineRegionVector &l
   if (list1.size() == 0) return 0;
   if (list2.size() == 0) return 0;
 
-  unsigned int desc_size = list1[0].desc.vec.size();
+  unsigned int desc_size = list1[0].desc.size();
 
   corresp.TCList.reserve((int)(list1.size()/10));
 
@@ -331,14 +331,14 @@ int MatchFlannFGINN(const AffineRegionVector &list1, const AffineRegionVector &l
     {
       float* Row = keys1.ptr<float>(i);
       for (j=0; j < desc_size; j++)
-        Row[j] = list1[i].desc.vec[j];
+        Row[j] = list1[i].desc[j];
     }
 
   for (i=0; i <list2.size(); i++)
     {
       float* Row = keys2.ptr<float>(i);
       for (j=0; j < desc_size; j++)
-        Row[j] = list2[i].desc.vec[j];
+        Row[j] = list2[i].desc[j];
     }
 
   cv::flann::Index tree = GenFLANNIndex(keys2,par.vector_matcher,par.vector_dist,par.kd_trees);
@@ -426,7 +426,7 @@ int MatchFLANNDistance(const AffineRegionVector &list1, const AffineRegionVector
   if (list1.size() == 0) return 0;
   if (list2.size() == 0) return 0;
 
-  unsigned int desc_size = list1[0].desc.vec.size();
+  unsigned int desc_size = list1[0].desc.size();
 
   corresp.TCList.clear();
   corresp.TCList.reserve((int)(list1.size()/10));
@@ -439,14 +439,14 @@ int MatchFLANNDistance(const AffineRegionVector &list1, const AffineRegionVector
     {
       unsigned char* Row = keys1.ptr<unsigned char>(i);
       for (j=0; j < desc_size; j++)
-        Row[j] = floor(list1[i].desc.vec[j]);
+        Row[j] = floor(list1[i].desc[j]);
     }
 
   for (i=0; i <list2.size(); i++)
     {
       unsigned char* Row = keys2.ptr<unsigned char>(i);
       for (j=0; j < desc_size; j++)
-        Row[j] = floor(list2[i].desc.vec[j]);
+        Row[j] = floor(list2[i].desc[j]);
     }
   cv::flann::SearchParams SearchParams1(par.knn_checks);
   cv::flann::Index tree = GenFLANNIndex(keys2,par.binary_matcher,par.binary_dist,par.kd_trees);

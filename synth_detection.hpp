@@ -52,7 +52,7 @@ void GenerateSynthImageCorr(const cv::Mat &in_img,
 //Function generates scaled, rotated and tilted image from image and homography matrix from original to generated image and places all this into SynthImage structure
 
 
-vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, vector<AffineKeypoint> &reproj_keys, vector<Descriptor> &descs, detector_type det_type, int img_id);
+vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, vector<AffineKeypoint> &reproj_keys, vector<descriptor_t> &descs, detector_type det_type, descriptor_type desc_type, int img_id);
 //Function detects affine regions using detector function and writes them into AffineRegionVector structure
 
 int reproject_and_remove_boundary(vector<AffineKeypoint> &keypoints, vector<AffineKeypoint> &reproj_keys, double *H, int orig_w, int orig_h, double mrSize = 3.0*sqrt(3.0));
@@ -78,7 +78,7 @@ int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
 //Detects orientation of the affine region and adds regions with detected orientation to the list.
 //All points that derived from one have the same parent_id
 
-void describe_regions(vector<AffineKeypoint> &in_kp_list, vector<Descriptor> &descs, SynthImage &img, DescriptorFunctor *descriptor, double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
+void describe_regions(vector<AffineKeypoint> &in_kp_list, vector<descriptor_t> &descs, SynthImage &img, DescriptorFunctor *descriptor, double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
 
 void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector& new_kps);
 //Function for getting new regions ID right (original IDs are changed to new ones to ensure no collisions in kp_list)

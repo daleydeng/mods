@@ -383,7 +383,7 @@ inline void addPeakAngle(float *hist, vector<float> &angles, int a, int b, int c
     }
 }
 
-vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, vector<AffineKeypoint> &reproj_keys, vector<Descriptor> &descs, detector_type det_type, int img_id)
+vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, vector<AffineKeypoint> &reproj_keys, vector<descriptor_t> &descs, detector_type det_type, descriptor_type desc_type, int img_id)
 //Function detects affine regions using detector function and writes them into AffineRegionVector structure
 {
 
@@ -406,6 +406,7 @@ vector<AffineRegion> convert_affine_regions(vector<AffineKeypoint> &aff_keys, ve
   {
     assert(descs.size() == aff_keys.size());
     for (int i = 0; i < descs.size(); i++) {
+      keypoints[i].desc_type = desc_type;
       keypoints[i].desc = descs[i];
     }
   }
@@ -761,7 +762,7 @@ void linH(double x, double y, double *H, double *linearH)
 //All points that derived from one have the same parent_id
 
 void describe_regions(vector<AffineKeypoint> &in_kp_list,
-                      vector<Descriptor> &descs,
+                      vector<descriptor_t> &descs,
                       SynthImage &img, DescriptorFunctor *descriptor,
                       double mrSize, int patchSize, bool fast_extraction, bool photoNorm)
 //Describes region with SIFT or other descriptor
@@ -822,8 +823,7 @@ void describe_regions(vector<AffineKeypoint> &in_kp_list,
           float mean, var;
           photometricallyNormalize(patch, mask, mean, var);
         }
-      (*descriptor)(patch, descs[i].vec);
-      descs[i].type = descriptor->type;
+      (*descriptor)(patch, descs[i]);
     }
   } else {
     for (i = 0; i < n_descs; i++) {
@@ -845,8 +845,7 @@ void describe_regions(vector<AffineKeypoint> &in_kp_list,
           float mean, var;
           photometricallyNormalize(patch, mask, mean, var);
         }
-      (*descriptor)(patch, descs[i].vec);
-      descs[i].type = descriptor->type;
+      (*descriptor)(patch, descs[i]);
     }
   }
 }
