@@ -517,7 +517,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
 
             if (det_par.ORBParam.doBaumberg) {
               vector<AffineKeypoint> temp_aff_keys;
-              detect_affine_shape(aff_keys, temp_aff_keys, temp_img1, det_par.BaumbergParam);
+              detect_affine_shape(aff_keys, temp_aff_keys, temp_img1.pixels, det_par.BaumbergParam);
               aff_keys = temp_aff_keys;
             }
             det_type = DET_ORB;
@@ -537,19 +537,18 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
           vector<AffineKeypoint> temp_kp1_upright;
 
           if (present_SIFT_like_desc) {
-              detect_orientation(aff_keys, temp_kp1_SIFT_like_desc, temp_img1,
+              detect_orientation(aff_keys, temp_kp1_SIFT_like_desc, temp_img1.pixels,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (present_HalfSIFT_like_desc) {
-              detect_orientation(aff_keys, temp_kp1_HalfSIFT_like_desc, temp_img1,
-                                dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
+              detect_orientation(aff_keys, temp_kp1_HalfSIFT_like_desc, temp_img1.pixels, dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 true, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (dom_ori_par.addUpRight) {
-              detect_orientation(aff_keys, temp_kp1_upright, temp_img1,
+              detect_orientation(aff_keys, temp_kp1_upright, temp_img1.pixels,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, 0, 1.0, true);
             }
@@ -584,7 +583,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor RootSIFTdesc(desc_par.RootSIFTParam);
                   describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
-                                  temp_img1, &RootSIFTdesc,
+                                  temp_img1.pixels, &RootSIFTdesc,
                                   desc_par.RootSIFTParam.PEParam.mrSize,
                                   desc_par.RootSIFTParam.PEParam.patchSize,
                                   desc_par.RootSIFTParam.PEParam.FastPatchExtraction,
@@ -595,7 +594,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor HalfRootSIFTdesc(desc_par.HalfRootSIFTParam);
                   describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
-                                  temp_img1, &HalfRootSIFTdesc,
+                                  temp_img1.pixels, &HalfRootSIFTdesc,
                                   desc_par.HalfRootSIFTParam.PEParam.mrSize,
                                   desc_par.HalfRootSIFTParam.PEParam.patchSize,
                                   desc_par.HalfRootSIFTParam.PEParam.FastPatchExtraction,
@@ -607,7 +606,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                   ///Description
                   SIFTDescriptor HalfSIFTdesc(desc_par.HalfSIFTParam);
                   describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
-                                  temp_img1, &HalfSIFTdesc,
+                                  temp_img1.pixels, &HalfSIFTdesc,
                                   desc_par.HalfSIFTParam.PEParam.mrSize,
                                   desc_par.HalfSIFTParam.PEParam.patchSize,
                                   desc_par.HalfSIFTParam.PEParam.FastPatchExtraction,
@@ -619,7 +618,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   SIFTDescriptor SIFTdesc(desc_par.SIFTParam);
                   describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
-                                  temp_img1, &SIFTdesc,
+                                  temp_img1.pixels, &SIFTdesc,
                                   desc_par.SIFTParam.PEParam.mrSize,
                                   desc_par.SIFTParam.PEParam.patchSize,
                                   desc_par.SIFTParam.PEParam.FastPatchExtraction,
@@ -630,7 +629,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
                 {
                   PIXELSDescriptor PixelDesc(desc_par.PixelsParam);
                   describe_regions(temp_kp1_desc, temp_kp1_desc_desc,
-                                  temp_img1, &PixelDesc,
+                                  temp_img1.pixels, &PixelDesc,
                                   desc_par.PixelsParam.PEParam.mrSize,
                                   desc_par.PixelsParam.PEParam.patchSize,
                                   desc_par.PixelsParam.PEParam.FastPatchExtraction,

@@ -508,7 +508,7 @@ public:
 };
 int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
                       vector<AffineKeypoint> &out_kp_list,
-                      SynthImage &img,
+                       cv::Mat &img,
                       double mrSize,
                       int patchSize,
                       bool doHalfSIFT,
@@ -529,10 +529,6 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
 
   cv::Mat patch(patchSize,patchSize,CV_32FC1);
 
-  cv::Mat H1(3,3,CV_64F,img.H);
-  cv::Mat Hinv(3,3,CV_64F);
-  cv::invert(H1,Hinv, cv::DECOMP_LU);
-
   EstimateDominantAnglesFunctor EstDomOri(patchSize,doHalfSIFT);
   for (int i=0; i < in_kp_list.size(); i++)
     {
@@ -540,7 +536,7 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
       angles1.clear();
       float curr_sc = imageToPatchScale*r.s;
 
-      if (interpolateCheckBorders(img.pixels.cols,img.pixels.rows,
+      if (interpolateCheckBorders(img.cols,img.rows,
                                   (float) r.x,
                                   (float) r.y,
                                   (float) r.a11,
@@ -554,7 +550,7 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
       if (maxAngNum > 0) {
           //we have to renumerate next regions.
 
-          interpolate(img.pixels,(float)r.x,
+          interpolate(img,(float)r.x,
                       (float)r.y,
                       (float)r.a11*curr_sc,
                       (float)r.a12*curr_sc,
@@ -584,9 +580,9 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
 }
 
 int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
-                      vector<AffineKeypoint> &out_kp_list,
-                      SynthImage &img,
-                      const AffineShapeParams par) {
+                        vector<AffineKeypoint> &out_kp_list,
+                        cv::Mat &img,
+                        const AffineShapeParams par) {
 
   out_kp_list.clear();
   int kp_size = in_kp_list.size();
@@ -615,7 +611,7 @@ int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
       cv::Mat U, V, d, Au, Ap, D;
 
       int maskPixels = par.smmWindowSize * par.smmWindowSize;
-      if (interpolateCheckBorders(img.pixels.cols,img.pixels.rows,
+      if (interpolateCheckBorders(img.cols,img.rows,
                                   (float) r.x,
                                   (float) r.y,
                                   (float) r.a11,
@@ -631,7 +627,7 @@ int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
           float a = 0, b = 0, c = 0;
           if (par.affBmbrgMethod == AFF_BMBRG_SMM) {
               // warp input according to current shape matrix
-              interpolate(img.pixels, lx, ly, u11*ratio, u12*ratio, u21*ratio, u22*ratio, patch);
+              interpolate(img, lx, ly, u11*ratio, u12*ratio, u21*ratio, u22*ratio, patch);
               //            std::cerr << "after interp ok" << std::endl;
               // compute SMM on the warped patch
               float *maskptr = mask.ptr<float>(0);
@@ -681,7 +677,7 @@ int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
                   float Dxx, Dxy, Dyy;
                   float affRatio = r.s * 0.5;
                   Ap = (cv::Mat_<float>(2,2) << u11, u12, u21, u22);
-                  interpolate(img.pixels, lx, ly, u11*affRatio, u12*affRatio, u21*affRatio, u22*affRatio, imgHes);
+                  interpolate(img, lx, ly, u11*affRatio, u12*affRatio, u21*affRatio, u22*affRatio, imgHes);
 
                   Dxx = (      imgHes.at<float>(0,0) - 2.f*imgHes.at<float>(0,1) +     imgHes.at<float>(0,2)
                                + 2.f*imgHes.at<float>(1,0) - 4.f*imgHes.at<float>(1,1) + 2.f*imgHes.at<float>(1,2)
@@ -763,7 +759,7 @@ void linH(double x, double y, double *H, double *linearH)
 
 void describe_regions(vector<AffineKeypoint> &in_kp_list,
                       vector<descriptor_t> &descs,
-                      SynthImage &img, DescriptorFunctor *descriptor,
+                      cv::Mat &img, DescriptorFunctor *descriptor,
                       double mrSize, int patchSize, bool fast_extraction, bool photoNorm)
 //Describes region with SIFT or other descriptor
 {
@@ -794,7 +790,7 @@ void describe_regions(vector<AffineKeypoint> &in_kp_list,
 
         Mat smoothed(patchImageSize, patchImageSize, CV_32FC1, (void *) &workspace.front());
         // interpolate with det == 1
-        interpolate(img.pixels,
+        interpolate(img,
                     (float) key.x,
                     (float) key.y,
                     (float) key.a11,
@@ -809,7 +805,7 @@ void describe_regions(vector<AffineKeypoint> &in_kp_list,
                     imageToPatchScale, 0, 0, imageToPatchScale, patch);
       } else {
         // if imageToPatchScale is small (i.e. lot of oversampling), affine normalize without smoothing
-        interpolate(img.pixels,
+        interpolate(img,
                     (float) key.x,
                     (float) key.y,
                     (float) key.a11 * imageToPatchScale,
@@ -833,7 +829,7 @@ void describe_regions(vector<AffineKeypoint> &in_kp_list,
       double imageToPatchScale = double(patchImageSize) / (double) patchSize;
       float curr_sc = imageToPatchScale;
 
-      interpolate(img.pixels,
+      interpolate(img,
                   (float) key.x,
                   (float) key.y,
                   (float) key.a11 * curr_sc,

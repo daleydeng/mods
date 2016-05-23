@@ -62,7 +62,7 @@ int reproject_and_remove_boundary(vector<AffineKeypoint> &keypoints, vector<Affi
 
 int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
                       vector<AffineKeypoint> &out_kp_list1,
-                      SynthImage &img,
+                       cv::Mat &img,
                       double mrSize = 3.0*sqrt(3.0),
                       int patchSize = 41,
                       bool doHalfSIFT = false,
@@ -72,13 +72,13 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
 
 int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
                         vector<AffineKeypoint> &out_kp_list1,
-                        SynthImage &img,
+                        cv::Mat &img,
                         const AffineShapeParams par);
 
 //Detects orientation of the affine region and adds regions with detected orientation to the list.
 //All points that derived from one have the same parent_id
 
-void describe_regions(vector<AffineKeypoint> &in_kp_list, vector<descriptor_t> &descs, SynthImage &img, DescriptorFunctor *descriptor, double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
+void describe_regions(vector<AffineKeypoint> &in_kp_list, vector<descriptor_t> &descs, cv::Mat &img, DescriptorFunctor *descriptor, double mrSize = 3.0*sqrt(3.0), int patchSize = 41, bool fast_extraction = false, bool photoNorm = false);
 
 void AddRegionsToList(AffineRegionVector &kp_list, AffineRegionVector& new_kps);
 //Function for getting new regions ID right (original IDs are changed to new ones to ensure no collisions in kp_list)
