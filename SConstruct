@@ -17,7 +17,6 @@ env.Append(
 srcs = glob('*.cpp')
 srcs.remove('mods.cpp')
 srcs.remove('io_mods.cpp')
-srcs.remove('tmp.cpp')
 srcs += glob('USAC/src/*/*.cpp') + glob('detectors/*/*.c*') + glob('detectors/*/*/*.c*')
 SharedLibrary('mods', srcs)
 StaticLibrary('mods_s', srcs)
