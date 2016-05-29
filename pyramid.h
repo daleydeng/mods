@@ -24,7 +24,7 @@ bool responseCompareInvOrder(AffineKeypoint k1,AffineKeypoint k2);
 class KeypointCallback
 {
 public:
-  virtual void onKeypointDetected(const Mat &blur, float x, float y, float s, float pixelDistance, int type, float response) = 0;
+  virtual void onKeypointDetected(const Mat &blur, AffineKeypoint &key) = 0;
 };
 
 struct ScaleSpaceDetector
@@ -83,7 +83,6 @@ protected:
   Mat dogResponse(const Mat &inputImage, float norm);
   Mat HessianResponse(const Mat &inputImage, float norm);
   Mat HarrisResponse(const Mat &inputImage, float norm);
-  Mat CaffeGradResponse(const Mat &inputImage, float norm);
   const Mat* originalImg;
 
 private:

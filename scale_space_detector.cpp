@@ -25,7 +25,7 @@ int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1,
       p1.doOnNormal = params.PyramidPars.doOnNormal;
     }
 
-  AffineDetector detector(input, p1, ap);
+  AffineDetector detector(p1, ap);
   detector.detectPyramidKeypoints(input);
   detector.exportKeypoints(out1);
   detector.exportScaleSpace(scale_pyramid);

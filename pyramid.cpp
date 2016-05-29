@@ -398,8 +398,16 @@ void ScaleSpaceDetector::localizeKeypoint(int r, int c, float curScale, float pi
 
   // point is now scale and translation invariant, add it...
   localized_points++;
-  if (keypointCallback)
-    keypointCallback->onKeypointDetected(prevBlur, pixelDistance*(c + b[0]), pixelDistance*(r + b[1]), pixelDistance*scale, pixelDistance, type, val);
+  if (keypointCallback) {
+    AffineKeypoint k;
+    k.x = c + b[0];
+    k.y = r + b[1];
+    k.s = scale;
+    k.sub_type = type;
+    k.response = val;
+    k.pyramid_scale = pixelDistance;
+    keypointCallback->onKeypointDetected(prevBlur, k);
+  }
 }
 
 void ScaleSpaceDetector::findLevelKeypoints(float curScale, float pixelDistance)
@@ -541,5 +549,6 @@ void ScaleSpaceDetector::detectPyramidKeypoints(const Mat &image)
       firstLevel = nextOctaveFirstLevel;
     }
 }
+
 
 } //namespace mods

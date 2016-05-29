@@ -21,14 +21,14 @@ inline float intensityNormCoef (const float intensity, const float a, const floa
 
 }
 
-bool AffineShape::findAffineShape(const Mat &blur, float x, float y, float s, float pixelDistance, int type, float response)
+bool AffineShape::findAffineShape(const Mat &blur, AffineKeypoint &key)
 {
-
   float eigen_ratio_act = 0.0f, eigen_ratio_bef = 0.0f;
   float u11 = 1.0f, u12 = 0.0f, u21 = 0.0f, u22 = 1.0f, l1 = 1.0f, l2 = 1.0f;
-  float lx = x/pixelDistance, ly = y/pixelDistance;
+  float lx = key.x, ly = key.y;
   //  float ratio = 1.0f;
-  float ratio =  s / (par.initialSigma*pixelDistance);
+  float s = key.s;
+  float ratio =  s / (par.initialSigma);
   Mat U, V, d, Au, Ap, D;
 
   if (par.doBaumberg)
@@ -88,7 +88,7 @@ bool AffineShape::findAffineShape(const Mat &blur, float x, float y, float s, fl
 
             } else if (par.affBmbrgMethod == AFF_BMBRG_HESSIAN) {
               float Dxx, Dxy, Dyy;
-              float affRatio = s * par.affMeasRegion / pixelDistance;
+              float affRatio = s * par.affMeasRegion;
               Ap = (cv::Mat_<float>(2,2) << u11, u12, u21, u22);
               interpolate(blur, lx, ly, u11*affRatio, u12*affRatio, u21*affRatio, u22*affRatio, imgHes);
 
@@ -136,28 +136,27 @@ bool AffineShape::findAffineShape(const Mat &blur, float x, float y, float s, fl
 
           if (eigen_ratio_act < par.convergenceThreshold && eigen_ratio_bef < par.convergenceThreshold)
             {
+              key.a11 = u11;
+              key.a12 = u12;
+              key.a21 = u21;
+              key.a22 = u22;
               if (affineShapeCallback)
-                affineShapeCallback->onAffineShapeFound(blur, x, y, s, pixelDistance, u11, u12, u21, u22, type, response, l);
+                affineShapeCallback->onAffineShapeFound(blur, key, l);
               return true;
             }
         }
     }
   else
     {
+      key.a11 = u11;
+      key.a12 = u12;
+      key.a21 = u21;
+      key.a22 = u22;
       if (affineShapeCallback)
-        affineShapeCallback->onAffineShapeFound(blur, x, y, s, pixelDistance, u11, u12, u21, u22, type, response, 0);
+        affineShapeCallback->onAffineShapeFound(blur, key, 0);
       return true;
     }
   return false;
-}
-
-void AffineShape::normalizeAffine(const Mat &img,
-                                  float x, float y, float s, float a11, float a12, float a21, float a22,
-                                  int type, float response)
-{
-  assert( fabs(a11*a22-a12*a21 - 1.0f) < 0.01);
-  if (normalizedPatchCallback)
-    normalizedPatchCallback->onNormalizedPatchAvailable(patch, x, y, s, a11, a12, a21, a22, type, response);
 }
 
 } //namespace mods

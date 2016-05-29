@@ -1,8 +1,6 @@
 #ifndef SCALESPACEDETECTOR_HPP
 #define SCALESPACEDETECTOR_HPP
 
-#undef __STRICT_ANSI__
-
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -21,7 +19,7 @@ using std::max;
 
 namespace mods {
 
-struct AffineDetector : public ScaleSpaceDetector, AffineShape, KeypointCallback, AffineShapeCallback, NormalizedPatchCallback
+struct AffineDetector : public ScaleSpaceDetector, AffineShape, KeypointCallback, AffineShapeCallback
 {
   const Mat image;
   vector<AffineKeypoint> keys;
@@ -30,54 +28,35 @@ struct AffineDetector : public ScaleSpaceDetector, AffineShape, KeypointCallback
   int g_numberOfDescribedPoints;
 
 public:
-  AffineDetector(const Mat &image, const PyramidParams &par, const AffineShapeParams &ap) :
+  AffineDetector(const PyramidParams &par, const AffineShapeParams &ap) :
     ScaleSpaceDetector(par),
-    AffineShape(ap),
-    image(image)
+    AffineShape(ap)
   {
     this->setKeypointCallback(this);
     this->setAffineShapeCallback(this);
-    this->setNormalizedPatchCallback(this);
   }
 
-  void onKeypointDetected(const Mat &blur, float x, float y, float s, float pixelDistance, int type, float response)
+  void onKeypointDetected(const Mat &blur, AffineKeypoint &key)
   {
     g_numberOfPoints++;
-    findAffineShape(blur, x, y, s, pixelDistance, type, response);
-
+    findAffineShape(blur, key);
   }
 
   void onAffineShapeFound(
-      const Mat &blur, float x, float y, float s, float pixelDistance,
-      float a11, float a12, float a21, float a22,
-      int type, float response, int iters)
+      const Mat &blur, AffineKeypoint &key, int iters)
   {
     // convert shape into a up is up frame
     // rectifyAffineTransformationUpIsUp(a11, a12, a21, a22);
     // now sample the patch
-    normalizeAffine(image, x, y, s, a11, a12, a21, a22, type, response);
-    g_numberOfAffinePoints++;
-  }
-
-  void onNormalizedPatchAvailable(
-      const Mat &patch,
-      float x, float y, float s,
-      float a11, float a12, float a21, float a22,
-      int type, float response)
-  {
-    // store the keypoint
     keys.push_back(AffineKeypoint());
     AffineKeypoint &k = keys.back();
-    k.x = x;
-    k.y = y;
-    k.s = s;
-    k.a11 = a11;
-    k.a12 = a12;
-    k.a21 = a21;
-    k.a22 = a22;
-    k.response = response;
-    k.sub_type = type;
+    key.x *= key.pyramid_scale;
+    key.y *= key.pyramid_scale;
+    key.s *= key.pyramid_scale;
+    k = key;
+
     g_numberOfDescribedPoints++;
+    g_numberOfAffinePoints++;
   }
 
   void exportKeypoints(vector<AffineKeypoint>& out1)

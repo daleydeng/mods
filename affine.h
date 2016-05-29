@@ -21,24 +21,7 @@ struct AffineShapeCallback
 {
   virtual void onAffineShapeFound(
       const cv::Mat &blur,     // corresponding scale level
-      float x, float y,     // subpixel, image coordinates
-      float s,              // scale
-      float pixelDistance,  // distance between pixels in provided blured image
-      float a11, float a12, // affine shape matrix
-      float a21, float a22,
-      int type, float response, int iters) = 0;
-};
-
-struct NormalizedPatchCallback
-{
-  virtual void onNormalizedPatchAvailable(
-      const cv::Mat &patch, // normalized patch
-      float x, float y,     // subpixel, image coordinates
-      float s,              // scale
-      float a11, float a12, // affine shape matrix (optionally with orientation)
-      float a21, float a22,
-      int type, float response) = 0;
-
+      AffineKeypoint &key, int iters) = 0;
 };
 
 struct AffineShape
@@ -59,31 +42,18 @@ public:
     computeGaussMask(mask);
     computeCircularGaussMask(orimask, par.patchSize/3.0f);
     affineShapeCallback = 0;
-    normalizedPatchCallback = 0;
     fx = cv::Scalar(0);
     fy = cv::Scalar(0);
   }
-  ~AffineShape()
-  {
-  }
 
   // computes affine shape
-  bool findAffineShape(const cv::Mat &blur, float x, float y, float s, float pixelDistance, int type, float response);
+  bool findAffineShape(const cv::Mat &blur, AffineKeypoint &key);
 
   // fills patch with affine normalized neighbourhood around point in the img, enlarged mrSize times, optionally a dominant orientation is estimated
   // the result is returned via NormalizedPatchCallback (called multiple times, once per each dominant orientation discovered)
-  void normalizeAffine(
-      const cv::Mat &img,
-      float x, float y, float s, float a11, float a12, float a21, float a22,
-      int type, float response);
   void setAffineShapeCallback(AffineShapeCallback *callback)
   {
     affineShapeCallback = callback;
-  }
-
-  void setNormalizedPatchCallback(NormalizedPatchCallback *callback)
-  {
-    normalizedPatchCallback = callback;
   }
 
 public:
@@ -93,7 +63,6 @@ protected:
 
 //  void estimateDominantAngles(const cv::Mat &img, std::vector<float> &angles);
   AffineShapeCallback *affineShapeCallback;
-  NormalizedPatchCallback *normalizedPatchCallback;
 
 private:
   cv::Mat gmag, gori, orimask;
