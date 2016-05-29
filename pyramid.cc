@@ -273,7 +273,7 @@ Mat ScaleSpaceDetector::HarrisResponse(const Mat &inputImage, float norm)
 }
 
 
-void ScaleSpaceDetector::localizeKeypoint(int r, int c, float curScale, float pixelDistance)
+void ScaleSpaceDetector::localizeKeypoint(int r, int c, float curScale, float pixelDistance, vector<AffineKeypoint> *keys)
 {
   const int cols = cur.cols;
   const int rows = cur.rows;
@@ -393,19 +393,18 @@ void ScaleSpaceDetector::localizeKeypoint(int r, int c, float curScale, float pi
 
   // point is now scale and translation invariant, add it...
   localized_points++;
-  if (keypointCallback) {
-    AffineKeypoint k;
-    k.x = c + b[0];
-    k.y = r + b[1];
-    k.s = scale;
-    k.sub_type = type;
-    k.response = val;
-    k.pyramid_scale = pixelDistance;
-    keypointCallback->onKeypointDetected(prevBlur, k);
-  }
+  AffineKeypoint k;
+  k.x = c + b[0];
+  k.y = r + b[1];
+  k.s = scale;
+  k.sub_type = type;
+  k.response = val;
+  k.pyramid_scale = pixelDistance;
+  k.octave_number = level_idx_map[prevBlur.size().width];
+  keys->push_back(k);
 }
 
-void ScaleSpaceDetector::findLevelKeypoints(float curScale, float pixelDistance)
+void ScaleSpaceDetector::findLevelKeypoints(float curScale, float pixelDistance, vector<AffineKeypoint> *keys)
 {
   assert(Pyrpar.border >= 2);
   const int rows = cur.rows;
@@ -422,13 +421,13 @@ void ScaleSpaceDetector::findLevelKeypoints(float curScale, float pixelDistance)
             //      if ( (val > positiveThreshold && (isMax(val, cur, r, c) && isMax(val, low, r, c) && isMax(val, high, r, c))) ||
             //           (val < negativeThreshold && (isMin(val, cur, r, c) && isMin(val, low, r, c) && isMin(val, high, r, c))) )
             // either positive -> local max. or negative -> local min.
-            localizeKeypoint(r, c, curScale, pixelDistance);
+            localizeKeypoint(r, c, curScale, pixelDistance, keys);
         }
     }
 }
 
 
-void ScaleSpaceDetector::detectOctaveKeypoints(const Mat &firstLevel, float pixelDistance, Mat &nextOctaveFirstLevel)
+void ScaleSpaceDetector::detectOctaveKeypoints(const Mat &firstLevel, float pixelDistance, Mat &nextOctaveFirstLevel, vector<AffineKeypoint> *keys)
 {
 
   octaveMap = Mat::zeros(firstLevel.rows, firstLevel.cols, CV_8UC1);
@@ -486,7 +485,7 @@ void ScaleSpaceDetector::detectOctaveKeypoints(const Mat &firstLevel, float pixe
         {
           // find keypoints in this part of octave for curLevel
 
-          findLevelKeypoints(curSigma, pixelDistance);
+          findLevelKeypoints(curSigma, pixelDistance, keys);
           numLevels--;
         }
 
@@ -510,8 +509,10 @@ void ScaleSpaceDetector::detectOctaveKeypoints(const Mat &firstLevel, float pixe
 
 }
 
-void ScaleSpaceDetector::detectPyramidKeypoints(const Mat &image)
+void ScaleSpaceDetector::detectPyramidKeypoints(const Mat &image, vector<AffineKeypoint> *keys)
 {
+  keys->clear();
+  levels.clear();
   scale_pyramid.par = Pyrpar;
 
   float curSigma = 0.5f;
@@ -537,8 +538,11 @@ void ScaleSpaceDetector::detectPyramidKeypoints(const Mat &image)
   int minSize = 2 * Pyrpar.border + 2;
   while (firstLevel.rows > minSize && firstLevel.cols > minSize)
     {
+      levels.push_back(firstLevel);
+      level_idx_map[firstLevel.size().width] = levels.size()-1;
+
       Mat nextOctaveFirstLevel;
-      detectOctaveKeypoints(firstLevel, pixelDistance, nextOctaveFirstLevel);
+      detectOctaveKeypoints(firstLevel, pixelDistance, nextOctaveFirstLevel, keys);
       pixelDistance *= 2.0;
       // firstLevel gets destroyed in the process
       firstLevel = nextOctaveFirstLevel;

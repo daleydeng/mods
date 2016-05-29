@@ -20,12 +20,6 @@ namespace mods {
 bool responseCompare(AffineKeypoint k1,AffineKeypoint k2);
 bool responseCompareInvOrder(AffineKeypoint k1,AffineKeypoint k2);
 
-class KeypointCallback
-{
-public:
-  virtual void onKeypointDetected(const Mat &blur, AffineKeypoint &key) = 0;
-};
-
 struct ScaleSpaceDetector
 {
   enum
@@ -39,8 +33,7 @@ struct ScaleSpaceDetector
     HARRIS_BRIGHT = 31,
     CAFFE_GRAD = 40
   };
-public:
-  KeypointCallback *keypointCallback;
+
   PyramidParams Pyrpar;
   ScalePyramid scale_pyramid;
   ScaleSpaceDetector(const PyramidParams &Pyrpar) :
@@ -61,29 +54,25 @@ public:
 
     if (Pyrpar.DetectorType == DET_HESSIAN)
       effectiveThreshold = effectiveThreshold*effectiveThreshold;
+  }
 
-    keypointCallback = 0;
-  }
-  void setKeypointCallback(KeypointCallback *callback)
-  {
-    keypointCallback = callback;
-  }
-  void detectPyramidKeypoints(const Mat &image);
+  void detectPyramidKeypoints(const Mat &image, vector<AffineKeypoint> *keys);
   int extrema_points;
   int localized_points;
   float effectiveThreshold;
+  std::vector<Mat> levels;
+  std::map<int, int> level_idx_map;
 
 protected:
-  void detectOctaveKeypoints(const Mat &firstLevel, float pixelDistance, Mat &nextOctaveFirstLevel);
-  void localizeKeypoint(int r, int c, float curScale, float pixelDistance);
-  void findLevelKeypoints(float curScale, float pixelDistance);
+  void detectOctaveKeypoints(const Mat &firstLevel, float pixelDistance, Mat &nextOctaveFirstLevel, vector<AffineKeypoint> *keys);
+  void localizeKeypoint(int r, int c, float curScale, float pixelDistance, vector<AffineKeypoint> *keys);
+  void findLevelKeypoints(float curScale, float pixelDistance, vector<AffineKeypoint> *keys);
   Mat Response(const Mat &inputImage, float norm);
   Mat iidogResponse(const Mat &inputImage, float norm);
   Mat dogResponse(const Mat &inputImage, float norm);
   Mat HessianResponse(const Mat &inputImage, float norm);
   Mat HarrisResponse(const Mat &inputImage, float norm);
   const Mat* originalImg;
-  std::vector<Mat> levels;
 
 private:
   // some constants derived from parameters
@@ -115,9 +104,6 @@ public:
   // computes affine shape
   bool findAffineShape(const cv::Mat &blur, AffineKeypoint &key);
 
-  // fills patch with affine normalized neighbourhood around point in the img, enlarged mrSize times, optionally a dominant orientation is estimated
-  // the result is returned via NormalizedPatchCallback (called multiple times, once per each dominant orientation discovered)
-
 public:
   AffineShapeParams par;
 
@@ -125,42 +111,30 @@ private:
   cv::Mat mask, img, imgHes, fx, fy;
 };
 
-struct AffineDetector : public ScaleSpaceDetector, AffineShape, KeypointCallback
+struct AffineDetector : public ScaleSpaceDetector, AffineShape
 {
-  vector<AffineKeypoint> keys;
-
 public:
   AffineDetector(const PyramidParams &par, const AffineShapeParams &ap) :
-    ScaleSpaceDetector(par),
-    AffineShape(ap)
-  {
-    this->setKeypointCallback(this);
-  }
+    ScaleSpaceDetector(par), AffineShape(ap) {}
 
-  void onKeypointDetected(const Mat &blur, AffineKeypoint &key)
-  {
-    if (findAffineShape(blur, key)) {
-      keys.push_back(AffineKeypoint());
-      AffineKeypoint &k = keys.back();
-      key.x *= key.pyramid_scale;
-      key.y *= key.pyramid_scale;
-      key.s *= key.pyramid_scale;
-      k = key;
+  void find_affine_shapes(vector<AffineKeypoint> &keys, vector<AffineKeypoint>  *out) {
+    out->clear();
+    for (auto &key: keys) {
+      if (findAffineShape(levels[key.octave_number], key)) {
+        out->push_back(AffineKeypoint());
+        auto &k = out->back();
+        k = key;
+        k.x *= k.pyramid_scale;
+        k.y *= k.pyramid_scale;
+        k.s *= k.pyramid_scale;
+        out->push_back(k);
+      }
     }
   }
 
-  void exportKeypoints(vector<AffineKeypoint>& out1);
-
-  void exportScaleSpace(ScalePyramid& exp_scale_pyramid)
-  {
-    exp_scale_pyramid = scale_pyramid;
-  }
+  void exportKeypoints(vector<AffineKeypoint>& keys, vector<AffineKeypoint> *out);
 
 private:
-  void sortKeys()
-  {
-    std::sort (keys.begin(), keys.end(), responseCompareInvOrder);
-  }
 };
 
 template<class T>

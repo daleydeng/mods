@@ -16,7 +16,12 @@ static inline int keys_nr_by_threshold(vector<AffineKeypoint> &keys, float th) {
   return low - keys.begin();
 }
 
-void AffineDetector::exportKeypoints(vector<AffineKeypoint>& out1) {
+static inline void sort_keys(vector<AffineKeypoint> &keys)
+{
+  std::sort (keys.begin(), keys.end(), responseCompareInvOrder);
+}
+
+void AffineDetector::exportKeypoints(vector<AffineKeypoint> &keys, vector<AffineKeypoint>* out1) {
   if (keys.size() <= 0)
     return;
 
@@ -27,7 +32,7 @@ void AffineDetector::exportKeypoints(vector<AffineKeypoint>& out1) {
     goto out;
   }
 
-  sortKeys();
+  sort_keys(keys);
   //    std::cerr << "Keys sorted" << std::endl;
 
   switch (Pyrpar.DetectorMode)
@@ -58,8 +63,8 @@ void AffineDetector::exportKeypoints(vector<AffineKeypoint>& out1) {
     keys.resize(new_nr);
 
 out:
-  out1.reserve(out1.size() + keys.size());
-  out1.insert(out1.end(), keys.begin(), keys.end());
+  out1->reserve(out1->size() + keys.size());
+  out1->insert(out1->end(), keys.begin(), keys.end());
 }
 
 int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1,
@@ -80,9 +85,11 @@ int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1,
   }
 
   AffineDetector detector(p1, ap);
-  detector.detectPyramidKeypoints(input);
-  detector.exportKeypoints(out1);
-  detector.exportScaleSpace(scale_pyramid);
+  vector<AffineKeypoint> aff_keys, aff_shapes;
+  detector.detectPyramidKeypoints(input, &aff_keys);
+  detector.find_affine_shapes(aff_keys, &aff_shapes);
+  detector.exportKeypoints(aff_shapes, &out1);
+  scale_pyramid = detector.scale_pyramid;
   for (auto &i: out1)
     rectifyTransformation(i);
   return out1.size();
