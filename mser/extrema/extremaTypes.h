@@ -7,7 +7,7 @@
 
 #include <LL.h>
 #include <vector>
-#include "../../../common.hpp"
+#include "../../common.hpp"
 
 #define c_maxByte 256
 

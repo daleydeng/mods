@@ -9,7 +9,7 @@
 
 #include "../utls/ecompat.h"
 #include "../utls/timeutls.h"
-#include "../../../common.hpp"
+#include "../../common.hpp"
 #include "libExtrema.h"
 #include "matrix.h"
 #include "extrema.h"
@@ -377,10 +377,8 @@ int DetectMSERs(cv::Mat &input, vector<AffineKeypoint> &out1, const ExtremaParam
 
     }
 
-  for (auto &i: out1) {
-    i.s *= sqrt(fabs(i.a11 * i.a22 - i.a12 * i.a21));
-    rectifyTransformation(i.a11, i.a12, i.a21, i.a22);
-  }
+  for (auto &i: out1)
+    rectifyTransformation(i);
   return out1.size();
 }
 

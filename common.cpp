@@ -28,6 +28,11 @@ void rectifyTransformation(double &a11, double &a12, double &a21, double &a22)
   a22 = det/b2a2;
 }
 
+void rectifyTransformation(AffineKeypoint &k) {
+  k.s *= sqrt(fabs(k.a11 * k.a22 - k.a12 * k.a21));
+  rectifyTransformation(k.a11, k.a12, k.a21, k.a22);
+}
+
 template <typename ValueType>
 void swap(ValueType *a, ValueType *b)
 {

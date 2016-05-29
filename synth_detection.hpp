@@ -60,7 +60,7 @@ int reproject_and_remove_boundary(vector<AffineKeypoint> &keypoints, vector<Affi
 //Then all regions that are outside original image (fully or partially) are deleted.
 
 
-int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
+int detect_orientations(const vector<AffineKeypoint> &in_kp_list,
                       vector<AffineKeypoint> &out_kp_list1,
                        cv::Mat &img,
                       double mrSize = 3.0*sqrt(3.0),
@@ -70,7 +70,7 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
                       double th = 0.8,
                       bool addUpRight = false);
 
-int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
+int detect_affine_shapes(const vector<AffineKeypoint> &in_kp_list,
                         vector<AffineKeypoint> &out_kp_list1,
                         cv::Mat &img,
                         const AffineShapeParams par);

@@ -9,15 +9,13 @@ env = DefaultEnvironment(
 
 env.Append(
     CXXFLAGS='-DA64 -fopenmp',
-    CPPPATH=['detectors/mser/LL/', 'detectors/mser/utls/', '/usr/local/opencv3/include'],
+    CPPPATH=['mser/LL/', 'mser/utls/', '/usr/local/opencv3/include', '.', 'app'],
     LIBPATH=['/usr/local/opencv3/lib'],
     LIBS=['gomp', 'lapack']+ ['opencv_'+i for i in ["core", "highgui", "imgproc", "flann", "video", "features2d", "calib3d", 'imgcodecs']]
 )
 
 srcs = glob('*.cpp')
-srcs.remove('mods.cpp')
-srcs.remove('io_mods.cpp')
-srcs += glob('USAC/src/*/*.cpp') + glob('detectors/*/*.c*') + glob('detectors/*/*/*.c*')
+srcs += glob('USAC/src/*/*.cpp') + glob('mser/*.c*') + glob('mser/*/*.c*')
 SharedLibrary('mods', srcs)
 StaticLibrary('mods_s', srcs)
-Program('run_mods', ['mods.cpp', 'io_mods.cpp', 'libmods_s.a'] + glob('inih/*.c') + glob('inih/cpp/INIReader.cpp'))
+Program('run_mods', ['app/mods.cpp', 'app/io_mods.cpp', 'libmods_s.a'] + glob('app/inih/*.c') + glob('app/inih/cpp/INIReader.cpp'))

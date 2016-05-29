@@ -17,7 +17,7 @@
 //#include <stdio.h>
 
 #include "ary.h"
-#include "../../../common.hpp"
+#include "../../common.hpp"
 #include "extremaTypes.h"
 
 using namespace std;

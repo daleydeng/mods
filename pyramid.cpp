@@ -12,7 +12,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <assert.h>
 #include <iostream>
-#include "../../common.hpp"
+#include "common.hpp"
 #include "pyramid.h"
 
 #ifdef _MSC_VER

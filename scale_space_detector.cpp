@@ -2,7 +2,7 @@
 /* Copyright 2013-2015, Dmytro Mishkin  ducha.aiki@gmail.com */
 /*------------------------------------------------------*/
 
-#include "scale-space-detector.hpp"
+#include "scale_space_detector.hh"
 using cv::Mat;
 using namespace std;
 
@@ -29,10 +29,8 @@ int DetectAffineKeypoints(const cv::Mat &input, vector<AffineKeypoint> &out1,
   detector.detectPyramidKeypoints(input);
   detector.exportKeypoints(out1);
   detector.exportScaleSpace(scale_pyramid);
-  for (auto &i: out1) {
-    i.s *= sqrt(fabs(i.a11 * i.a22 - i.a12 * i.a21));
-    rectifyTransformation(i.a11, i.a12, i.a21, i.a22);
-  }
+  for (auto &i: out1)
+    rectifyTransformation(i);
   return out1.size();
 }
 

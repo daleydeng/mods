@@ -7,8 +7,8 @@
 #include "synth_detection.hpp"
 #include <assert.h>
 #include <opencv2/opencv.hpp>
-#include "detectors/mser/utls/matrix.h"
-#include "detectors/mser/extrema/extrema.h"
+#include "mser/utls/matrix.h"
+#include "mser/extrema/extrema.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -506,7 +506,7 @@ public:
       }
   }
 };
-int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
+int detect_orientations(const vector<AffineKeypoint> &in_kp_list,
                       vector<AffineKeypoint> &out_kp_list,
                        cv::Mat &img,
                       double mrSize,
@@ -579,7 +579,7 @@ int detect_orientation(const vector<AffineKeypoint> &in_kp_list,
   return (int)temp_kp_list.size();
 }
 
-int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
+int detect_affine_shapes(const vector<AffineKeypoint> &in_kp_list,
                         vector<AffineKeypoint> &out_kp_list,
                         cv::Mat &img,
                         const AffineShapeParams par) {
@@ -726,6 +726,7 @@ int detect_affine_shape(const vector<AffineKeypoint> &in_kp_list,
               r.a12 = u12;
               r.a21 = u21;
               r.a22 = u22;
+              rectifyTransformation(r);
               out_kp_list.push_back(r);
               break;
             }

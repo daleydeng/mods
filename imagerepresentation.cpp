@@ -2,8 +2,8 @@
 #include "pixel_desc.hpp"
 #include "imagerepresentation.hpp"
 #include "synth_detection.hpp"
-#include "detectors/mser/extrema/extrema.h"
-#include "detectors/affinedetectors/scale-space-detector.hpp"
+#include "mser/extrema/extrema.h"
+#include "scale_space_detector.hh"
 #include <opencv2/features2d/features2d.hpp>
 //#include <opencv2/nonfree/nonfree.hpp>
 //#include <opencv2/nonfree/features2d.hpp>
@@ -517,7 +517,7 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
 
             if (det_par.ORBParam.doBaumberg) {
               vector<AffineKeypoint> temp_aff_keys;
-              detect_affine_shape(aff_keys, temp_aff_keys, temp_img1.pixels, det_par.BaumbergParam);
+              detect_affine_shapes(aff_keys, temp_aff_keys, temp_img1.pixels, det_par.BaumbergParam);
               aff_keys = temp_aff_keys;
             }
             det_type = DET_ORB;
@@ -537,18 +537,18 @@ void ImageRepresentation::SynthDetectDescribeKeypoints (IterationViewsynthesisPa
           vector<AffineKeypoint> temp_kp1_upright;
 
           if (present_SIFT_like_desc) {
-              detect_orientation(aff_keys, temp_kp1_SIFT_like_desc, temp_img1.pixels,
+              detect_orientations(aff_keys, temp_kp1_SIFT_like_desc, temp_img1.pixels,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (present_HalfSIFT_like_desc) {
-              detect_orientation(aff_keys, temp_kp1_HalfSIFT_like_desc, temp_img1.pixels, dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
+              detect_orientations(aff_keys, temp_kp1_HalfSIFT_like_desc, temp_img1.pixels, dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 true, dom_ori_par.maxAngles,
                                 dom_ori_par.threshold, false);
             }
           if (dom_ori_par.addUpRight) {
-              detect_orientation(aff_keys, temp_kp1_upright, temp_img1.pixels,
+              detect_orientations(aff_keys, temp_kp1_upright, temp_img1.pixels,
                                 dom_ori_par.PEParam.mrSize, dom_ori_par.PEParam.patchSize,
                                 false, 0, 1.0, true);
             }

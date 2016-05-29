@@ -651,6 +651,7 @@ struct DescriptorFunctor {
 };
 
 void rectifyTransformation(double &a11, double &a12, double &a21, double &a22);
+void rectifyTransformation(AffineKeypoint &k);
 
 } //namespace mods
 
