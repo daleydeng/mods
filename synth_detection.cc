@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include "mser/utls/matrix.h"
 #include "mser/extrema/extrema.h"
+#include "scale_space_detector.hh"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -582,156 +583,16 @@ int detect_orientations(const vector<AffineKeypoint> &in_kp_list,
 int detect_affine_shapes(const vector<AffineKeypoint> &in_kp_list,
                         vector<AffineKeypoint> &out_kp_list,
                         cv::Mat &img,
-                        const AffineShapeParams par) {
+                        const AffineShapeParams &par) {
 
   out_kp_list.clear();
-  int kp_size = in_kp_list.size();
-  const float initialSigma = 1.6;
-  cv::Mat gmag, gori, orimask;
-  //  std::vector<unsigned char> workspace;
-  cv::Mat mask, patch, imgHes, fx, fy;
-
-  gmag = cv::Mat(par.patchSize, par.patchSize, CV_32FC1);
-  gori = cv::Mat(par.patchSize, par.patchSize, CV_32FC1);
-  orimask = cv::Mat(par.patchSize, par.patchSize, CV_32FC1);
-  mask = cv::Mat(par.smmWindowSize, par.smmWindowSize, CV_32FC1);
-  patch = cv::Mat(par.smmWindowSize, par.smmWindowSize, CV_32FC1);
-  fx = cv::Mat(par.smmWindowSize, par.smmWindowSize, CV_32FC1);
-  fy = cv::Mat(par.smmWindowSize, par.smmWindowSize, CV_32FC1);
-
-  computeGaussMask(mask);
-  computeCircularGaussMask(orimask, par.smmWindowSize);
-  for (int kp_num=0; kp_num < kp_size; kp_num++)
-    {
-      auto r = in_kp_list[kp_num];
-      float eigen_ratio_act = 0.0f, eigen_ratio_bef = 0.0f;
-      float u11 = 1.0f, u12 = 0.0f, u21 = 0.0f, u22 = 1.0f, l1 = 1.0f, l2 = 1.0f;
-      float lx = r.x, ly = r.y;
-      float ratio =  r.s / (initialSigma);
-      cv::Mat U, V, d, Au, Ap, D;
-
-      int maskPixels = par.smmWindowSize * par.smmWindowSize;
-      if (interpolateCheckBorders(img.cols,img.rows,
-                                  (float) r.x,
-                                  (float) r.y,
-                                  (float) r.a11,
-                                  (float) r.a12,
-                                  (float) r.a21,
-                                  (float) r.a22,
-                                  2*5.0*ratio,
-                                  2*5.0*ratio) ) {
-          continue;
-        }
-      for (int l = 0; l < par.maxIterations; l++)
-        {
-          float a = 0, b = 0, c = 0;
-          if (par.affBmbrgMethod == AFF_BMBRG_SMM) {
-              // warp input according to current shape matrix
-              interpolate(img, lx, ly, u11*ratio, u12*ratio, u21*ratio, u22*ratio, patch);
-              //            std::cerr << "after interp ok" << std::endl;
-              // compute SMM on the warped patch
-              float *maskptr = mask.ptr<float>(0);
-              float *pfx = fx.ptr<float>(0), *pfy = fy.ptr<float>(0);
-              computeGradient(patch, fx, fy);
-
-              // estimate SMM
-              for (int i = 0; i < maskPixels; ++i)
-                {
-                  float v = (*maskptr);
-                  float gxx = *pfx;
-                  float gyy = *pfy;
-                  float gxy = gxx * gyy;
-
-                  a += gxx * gxx * v;
-                  b += gxy * v;
-                  c += gyy * gyy * v;
-                  pfx++;
-                  pfy++;
-                  maskptr++;
-                }
-              a /= maskPixels;
-              b /= maskPixels;
-              c /= maskPixels;
-
-              // compute inverse sqrt of the SMM
-              invSqrt(a, b, c, l1, l2);
-
-              if ((a != a) || (b != b) || (c !=c)){ //check for nan
-                  break;
-                }
-
-              // update e igen ratios
-              eigen_ratio_bef = eigen_ratio_act;
-              eigen_ratio_act = 1.0 - l2 / l1;
-
-              // accumulate the affine shape matrix
-              float u11t = u11, u12t = u12;
-
-              u11 = a*u11t+b*u21;
-              u12 = a*u12t+b*u22;
-              u21 = b*u11t+c*u21;
-              u22 = b*u12t+c*u22;
-
-            } else {
-              if (par.affBmbrgMethod == AFF_BMBRG_HESSIAN) {
-                  float Dxx, Dxy, Dyy;
-                  float affRatio = r.s * 0.5;
-                  Ap = (cv::Mat_<float>(2,2) << u11, u12, u21, u22);
-                  interpolate(img, lx, ly, u11*affRatio, u12*affRatio, u21*affRatio, u22*affRatio, imgHes);
-
-                  Dxx = (      imgHes.at<float>(0,0) - 2.f*imgHes.at<float>(0,1) +     imgHes.at<float>(0,2)
-                               + 2.f*imgHes.at<float>(1,0) - 4.f*imgHes.at<float>(1,1) + 2.f*imgHes.at<float>(1,2)
-                               +     imgHes.at<float>(2,0) - 2.f*imgHes.at<float>(2,1) +     imgHes.at<float>(2,2));
-
-                  Dyy = (      imgHes.at<float>(0,0) + 2.f*imgHes.at<float>(0,1) +     imgHes.at<float>(0,2)
-                               - 2.f*imgHes.at<float>(1,0) - 4.f*imgHes.at<float>(1,1) - 2.f*imgHes.at<float>(1,2)
-                               +     imgHes.at<float>(2,0) + 2.f*imgHes.at<float>(2,1) +     imgHes.at<float>(2,2));
-
-                  Dxy = (      imgHes.at<float>(0,0)           -     imgHes.at<float>(0,2)
-                               - imgHes.at<float>(2,0)           +     imgHes.at<float>(2,2));
-
-                  // Inv. square root using SVD method, somehow the SMM method does not work
-                  Au = (cv::Mat_<float>(2,2) << Dxx, Dxy, Dxy, Dyy);
-                  cv::SVD::compute(Au,d,U,V);
-
-                  l1 = d.at<float>(0,0);
-                  l2 = d.at<float>(0,1);
-
-                  eigen_ratio_bef=eigen_ratio_act;
-                  eigen_ratio_act=1.0-abs(l2)/abs(l1);
-
-                  float det = sqrt(abs(l1*l2));
-                  l2 = sqrt(sqrt(abs(l1)/det));
-                  l1 = 1./l2;
-
-                  D = (cv::Mat_<float>(2,2) << l1, 0, 0, l2);
-                  Au = U * D * V;
-                  Ap = Au * Ap * Au;
-
-                  u11 = Ap.at<float>(0,0); u12 = Ap.at<float>(0,1);
-                  u21 = Ap.at<float>(1,0); u22 = Ap.at<float>(1,1);
-                }
-            }
-          // compute the eigen values of the shape matrix
-          if (!getEigenvalues(u11, u12, u21, u22, l1, l2))
-            break;
-
-          // leave on too high anisotropy
-          if ((l1/l2>6) || (l2/l1>6))
-            break;
-
-          if (eigen_ratio_act < par.convergenceThreshold
-              && eigen_ratio_bef < par.convergenceThreshold) {
-              r.a11 = u11;
-              r.a12 = u12;
-              r.a21 = u21;
-              r.a22 = u22;
-              rectifyTransformation(r);
-              out_kp_list.push_back(r);
-              break;
-            }
-        }
+  AffineShape as(par);
+  for (auto k: in_kp_list) {
+    if (as.findAffineShape(img, k)) {
+      rectifyTransformation(k);
+      out_kp_list.push_back(k);
     }
+  }
 }
 
 void linH(double x, double y, double *H, double *linearH)

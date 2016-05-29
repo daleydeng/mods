@@ -73,7 +73,7 @@ int detect_orientations(const vector<AffineKeypoint> &in_kp_list,
 int detect_affine_shapes(const vector<AffineKeypoint> &in_kp_list,
                         vector<AffineKeypoint> &out_kp_list1,
                         cv::Mat &img,
-                        const AffineShapeParams par);
+                        const AffineShapeParams &par);
 
 //Detects orientation of the affine region and adds regions with detected orientation to the list.
 //All points that derived from one have the same parent_id
