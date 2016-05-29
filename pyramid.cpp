@@ -31,7 +31,7 @@ bool responseCompare(AffineKeypoint k1,AffineKeypoint k2) {return (fabs(k1.respo
 bool responseCompareInvOrder(AffineKeypoint k1,AffineKeypoint k2) {return (fabs(k1.response) > fabs(k2.response));}
 
 const float INT_NORM_EPS = 1e-10;
-inline float intensityNormCoef (const float intensity, const float a, const float b, const float g_inv)
+inline float intensityNormCoef (float intensity, float a, float b, float g_inv)
 {
   return (a / (intensity*g_inv+b+INT_NORM_EPS));
 }
@@ -42,7 +42,7 @@ bool isMax(float val, const Mat &pix, int row, int col)
 {
   for (int r = row - 1; r <= row + 1; r++)
     {
-      const float *row = pix.ptr<float>(r);
+      auto *row = pix.ptr<float>(r);
       for (int c = col - 1; c <= col + 1; c++)
         if (row[c] > val)
           return false;
@@ -54,7 +54,7 @@ bool isMin(float val, const Mat &pix, int row, int col)
 {
   for (int r = row - 1; r <= row + 1; r++)
     {
-      const float *row = pix.ptr<float>(r);
+      auto *row = pix.ptr<float>(r);
       for (int c = col - 1; c <= col + 1; c++)
         if (row[c] < val)
           return false;
@@ -182,7 +182,7 @@ Mat ScaleSpaceDetector::iidogResponse(const Mat &inputImage, float norm)
   for (int r = 0; r < rows; r++)
     {
       float *outPtr = outputImage.ptr<float>(r);
-      const float *SumPtr =Sum1.ptr<float>(r);
+      auto *SumPtr =Sum1.ptr<float>(r);
       for (int c = 0; c < cols; c++)
         {
           if (*SumPtr < 255.)
@@ -203,7 +203,7 @@ Mat ScaleSpaceDetector::HessianResponse(const Mat &inputImage, float norm)
   Mat outputImage(rows, cols, CV_32FC1);
 
   // setup input and output pointer to be centered at 1,0 and 1,1 resp.
-  const float *in = inputImage.ptr<float>(1);
+  auto *in = inputImage.ptr<float>(1);
   float      *out = outputImage.ptr<float>(1) + 1;
 
   float norm2 = norm * norm;
@@ -224,9 +224,9 @@ Mat ScaleSpaceDetector::HessianResponse(const Mat &inputImage, float norm)
       for (int c = 1; c < cols - 1; ++c)
         {
           /* fetch remaining values (last column) */
-          const float v13 = in[-stride];
-          const float v23 = *in;
-          const float v33 = in[+stride];
+          float v13 = in[-stride];
+          float v23 = *in;
+          float v33 = in[+stride];
 
           // compute 3x3 Hessian values from symmetric differences.
           float Lxx = (v21 - 2*v22 + v23);
@@ -296,17 +296,17 @@ void ScaleSpaceDetector::localizeKeypoint(int r, int c, float curScale, float pi
       c = nc;
 
       // preparing data
-      const float *cur0Ptr = cur.ptr<float>(r-1);
-      const float *cur1Ptr = cur.ptr<float>(r);
-      const float *cur2Ptr = cur.ptr<float>(r+1);
+      auto *cur0Ptr = cur.ptr<float>(r-1);
+      auto *cur1Ptr = cur.ptr<float>(r);
+      auto *cur2Ptr = cur.ptr<float>(r+1);
 
-      const float *low0Ptr = low.ptr<float>(r-1);
-      const float *low1Ptr = low.ptr<float>(r);
-      const float *low2Ptr = low.ptr<float>(r+1);
+      auto *low0Ptr = low.ptr<float>(r-1);
+      auto *low1Ptr = low.ptr<float>(r);
+      auto *low2Ptr = low.ptr<float>(r+1);
 
-      const float *high0Ptr = high.ptr<float>(r-1);
-      const float *high1Ptr = high.ptr<float>(r);
-      const float *high2Ptr = high.ptr<float>(r+1);
+      auto *high0Ptr = high.ptr<float>(r-1);
+      auto *high1Ptr = high.ptr<float>(r);
+      auto *high2Ptr = high.ptr<float>(r+1);
       //
       float dxx = cur1Ptr[c-1] - 2.0f * cur1Ptr[c] + cur1Ptr[c+1];
       float dyy = cur0Ptr[c]   - 2.0f * cur1Ptr[c] + cur2Ptr[c];
@@ -418,10 +418,10 @@ void ScaleSpaceDetector::findLevelKeypoints(float curScale, float pixelDistance)
 
   for (int r = Pyrpar.border; r < (rows - Pyrpar.border); r++)
     {
-      const float* curPtr = cur.ptr<float>(r);
+      auto* curPtr = cur.ptr<float>(r);
       for (int c = Pyrpar.border; c < (cols - Pyrpar.border); c++)
         {
-          const float val = curPtr[c];
+          float val = curPtr[c];
           if ( (val > positiveThreshold && (isMax(val, cur, r, c) && isMax(val, low, r, c) && isMax(val, high, r, c))) ||
                (val < negativeThreshold && (isMin(val, cur, r, c) && isMin(val, low, r, c) && isMin(val, high, r, c))) )
             //      if ( (val > positiveThreshold && (isMax(val, cur, r, c) && isMax(val, low, r, c) && isMax(val, high, r, c))) ||
@@ -476,10 +476,10 @@ void ScaleSpaceDetector::detectOctaveKeypoints(const Mat &firstLevel, float pixe
           for(int rr = 0; rr < nRows; ++rr)
             {
               float *highPtr = high.ptr<float>(rr);
-              const float *intensityPtr = nextBlur.ptr<float>(rr);
+              auto *intensityPtr = nextBlur.ptr<float>(rr);
               for (int j = 0; j < nCols; ++j)
                 {
-                  const float norm_coef = intensityNormCoef(intensityPtr[j],a,b,g_inv);
+                  float norm_coef = intensityNormCoef(intensityPtr[j],a,b,g_inv);
                   highPtr[j] *= norm_coef*norm_coef;
                 }
             }

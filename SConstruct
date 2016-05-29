@@ -14,7 +14,7 @@ env.Append(
     LIBS=['gomp', 'lapack']+ ['opencv_'+i for i in ["core", "highgui", "imgproc", "flann", "video", "features2d", "calib3d", 'imgcodecs']]
 )
 
-srcs = glob('*.cpp')
+srcs = glob('*.c*')
 srcs += glob('USAC/src/*/*.cpp') + glob('mser/*.c*') + glob('mser/*/*.c*')
 SharedLibrary('mods', srcs)
 StaticLibrary('mods_s', srcs)

@@ -84,6 +84,7 @@ protected:
   Mat HessianResponse(const Mat &inputImage, float norm);
   Mat HarrisResponse(const Mat &inputImage, float norm);
   const Mat* originalImg;
+  std::vector<Mat> levels;
 
 private:
   // some constants derived from parameters
