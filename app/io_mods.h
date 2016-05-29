@@ -5,8 +5,8 @@
 #define MODS_NEW_IO_MODS_H
 
 #include "configuration.hpp"
-#include "common.hpp"
-#include "matching.hpp"
+#include "common.hh"
+#include "matching.hh"
 #include "inih/cpp/INIReader.h"
 
 const int Tmin = 9;//minimum number of command-line parameters

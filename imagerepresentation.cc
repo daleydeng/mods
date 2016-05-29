@@ -1,7 +1,6 @@
-#include "sift_desc.hpp"
-#include "pixel_desc.hpp"
-#include "imagerepresentation.hpp"
-#include "synth_detection.hpp"
+#include "desc.hh"
+#include "imagerepresentation.hh"
+#include "synth_detection.hh"
 #include "mser/extrema/extrema.h"
 #include "scale_space_detector.hh"
 #include <opencv2/features2d/features2d.hpp>

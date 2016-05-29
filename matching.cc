@@ -2,9 +2,7 @@
 /* Copyright 2013, Dmytro Mishkin  ducha.aiki@gmail.com */
 /*------------------------------------------------------*/
 
-#undef __STRICT_ANSI__
-
-#include "matching.hpp"
+#include "matching.hh"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

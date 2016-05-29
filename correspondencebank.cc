@@ -1,5 +1,5 @@
-#include "correspondencebank.hpp"
-#include "synth_detection.hpp"
+#include "correspondencebank.hh"
+#include "synth_detection.hh"
 
 #ifdef _OPENMP
 #include <omp.h>

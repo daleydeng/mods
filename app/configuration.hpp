@@ -6,7 +6,7 @@
 #define CONFIGURATION_HPP
 
 #include <vector>
-#include "matching.hpp"
+#include "matching.hh"
 
 #define WITH_ORSA
 

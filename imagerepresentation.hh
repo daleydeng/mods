@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include "common.hpp"
+#include "common.hh"
 
 namespace mods {
 

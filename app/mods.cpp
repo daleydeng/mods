@@ -8,10 +8,10 @@
 
 #include <opencv2/opencv.hpp>
 #include "io_mods.h"
-#include "matching.hpp"
+#include "matching.hh"
 #include "configuration.hpp"
-#include "imagerepresentation.hpp"
-#include "correspondencebank.hpp"
+#include "imagerepresentation.hh"
+#include "correspondencebank.hh"
 
 #ifdef _OPENMP
 #include <omp.h>

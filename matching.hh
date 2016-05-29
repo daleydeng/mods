@@ -6,7 +6,7 @@
 #define MODS_MATCHING_HPP
 
 #include <opencv2/flann/flann.hpp>
-#include "common.hpp"
+#include "common.hh"
 
 #define MIN_POINTS 8 //threshold for symmetrical error check
 #define USE_SECOND_BAD 1//uncomment if you need to use/output 1st geom.inconsistent region

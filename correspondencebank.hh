@@ -5,9 +5,9 @@
 #include <string>
 #include <map>
 
-#include "common.hpp"
-#include "matching.hpp"
-#include "imagerepresentation.hpp"
+#include "common.hh"
+#include "matching.hh"
+#include "imagerepresentation.hh"
 
 namespace mods {
 

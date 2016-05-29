@@ -9,7 +9,7 @@
 
 #include "../utls/ecompat.h"
 #include "../utls/timeutls.h"
-#include "../../common.hpp"
+#include "../../common.hh"
 #include "libExtrema.h"
 #include "matrix.h"
 #include "extrema.h"

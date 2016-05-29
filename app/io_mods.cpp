@@ -3,7 +3,7 @@
 /*----------------------------------------------------------*/
 
 #include "io_mods.h"
-#include "synth_detection.hpp"
+#include "synth_detection.hh"
 
 #ifdef _OPENMP
 #include <omp.h>

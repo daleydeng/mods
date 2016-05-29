@@ -4,7 +4,7 @@
 
 #undef __STRICT_ANSI__
 
-#include "synth_detection.hpp"
+#include "synth_detection.hh"
 #include <assert.h>
 #include <opencv2/opencv.hpp>
 #include "mser/utls/matrix.h"

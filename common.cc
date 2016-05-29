@@ -10,7 +10,7 @@
 #include <cmath>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "common.hpp"
+#include "common.hh"
 //#include <iostream>
 using cv::Mat;
 using namespace std;

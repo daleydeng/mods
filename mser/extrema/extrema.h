@@ -1,7 +1,7 @@
 #ifndef __EXTREMA_H__
 #define __EXTREMA_H__
 #undef __STRICT_ANSI__
-#include "../../common.hpp"
+#include "../../common.hh"
 #include <opencv2/core/core.hpp>
 
 namespace mods {

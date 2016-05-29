@@ -6,8 +6,8 @@
  * the terms of the BSD license (see the COPYING file).
  *
  */
-#include "affine.h"
 #include <assert.h>
+#include "scale_space_detector.hh"
 using cv::Mat;
 using namespace std;
 
@@ -140,8 +140,6 @@ bool AffineShape::findAffineShape(const Mat &blur, AffineKeypoint &key)
               key.a12 = u12;
               key.a21 = u21;
               key.a22 = u22;
-              if (affineShapeCallback)
-                affineShapeCallback->onAffineShapeFound(blur, key, l);
               return true;
             }
         }
@@ -152,8 +150,6 @@ bool AffineShape::findAffineShape(const Mat &blur, AffineKeypoint &key)
       key.a12 = u12;
       key.a21 = u21;
       key.a22 = u22;
-      if (affineShapeCallback)
-        affineShapeCallback->onAffineShapeFound(blur, key, 0);
       return true;
     }
   return false;

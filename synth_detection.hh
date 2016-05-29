@@ -6,7 +6,7 @@
 #undef __STRICT_ANSI__
 
 #include <sys/time.h>
-#include "common.hpp"
+#include "common.hh"
 
 namespace mods {
 

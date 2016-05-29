@@ -6,18 +6,13 @@
  * the terms of the BSD license (see the COPYING file).
  *
  */
-#undef __STRICT_ANSI__
 #include <vector>
 #include <algorithm>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <assert.h>
 #include <iostream>
-#include "common.hpp"
-#include "pyramid.h"
-
-#ifdef _MSC_VER
-#define isnan _isnan
-#endif
+#include "common.hh"
+#include "scale_space_detector.hh"
 
 // it seems 0.6 works better than 0.5 (as in DL paper)
 #define MAX_SUBPIXEL_SHIFT 0.6

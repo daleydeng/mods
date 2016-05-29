@@ -6,10 +6,10 @@
  * the terms of the BSD license (see the COPYING file).
  *
  */
-#undef __STRICT_ANSI__
 #include <vector>
-#include "sift_desc.hpp"
 #include <iostream>
+#include "desc.hh"
+
 using namespace std;
 using cv::Mat;
 
