@@ -127,7 +127,6 @@ public:
         k.x *= k.pyramid_scale;
         k.y *= k.pyramid_scale;
         k.s *= k.pyramid_scale;
-        out->push_back(k);
       }
     }
   }
