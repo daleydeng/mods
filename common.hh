@@ -564,7 +564,7 @@ struct SIFTDescriptorParams
   int orientationBins;
   double maxBinValue;
   int patchSize;
-  char useRootSIFT;
+  int useRootSIFT;
   bool FastPatchExtraction;
   int doHalfSIFT;
   int dims;

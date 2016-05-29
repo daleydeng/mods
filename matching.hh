@@ -13,6 +13,10 @@
 
 namespace mods {
 
+void  GetEpipoles (double *F, double *e1, double *e2);
+void GetEpipolarLine(double *e, double *pt, double *l, double &k, double &b);
+void GetEpipolarLineF(double *F, double *pt, double *l, double &k, double &b);
+
 //verificator types
 enum RANSAC_mode_t {Homog,Fundamental};
 
@@ -233,22 +237,6 @@ void DuplicateFiltering(TentativeCorrespListExt &in_corresp, const double r = 3.
 //If distance^2 < r_sq in both images, correspondences are considered as duplicates and
 //second point is deleted.
 
-
-void DrawMatches(const cv::Mat &in_img1,const cv::Mat &in_img2, cv::Mat &out_img1,cv::Mat &out_img2,const cv::Mat &H,
-                 TentativeCorrespListExt matchings,
-                 const int DrawCentersOnly = 1,
-                 const int ReprojectToOneImage = 1,
-                 const int r1=2,
-                 const int r2=2,
-                 const int drawEpipolarLines =0,
-                 const double LAFcoef = 0,
-                 const cv::Scalar color1= cv::Scalar(255,0,0),
-                 const cv::Scalar color2= cv::Scalar(0,255,0));
-void WriteMatchings(TentativeCorrespListExt &match, std::ostream &out1, int writeWithRatios = 0);
-//Writes matchings in format: number x1 y1 x2 y2
-
-void WriteH(double* H, std::ostream &out1);
-//Writes homography matrix 3*3 into stream or file
 
 } //namespace mods
 

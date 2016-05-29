@@ -64,5 +64,18 @@ int getCLIparamExtractFeatures(configs &conf1,int argc, char **argv);
 int getCLIparamExtractFeaturesBenchmark(configs &conf1,int argc, char **argv);
 int getCLIparamExportDescriptorsBenchmark(configs &conf1,int argc, char **argv);
 
+void WriteMatchings(TentativeCorrespListExt &match, std::ostream &out1, int writeWithRatios = 0);
+void WriteH(double* H, std::ostream &out1);
+
+void DrawMatches(const cv::Mat &in_img1,const cv::Mat &in_img2, cv::Mat &out_img1,cv::Mat &out_img2,const cv::Mat &H,
+                 TentativeCorrespListExt matchings,
+                 const int DrawCentersOnly = 1,
+                 const int ReprojectToOneImage = 1,
+                 const int r1=2,
+                 const int r2=2,
+                 const int drawEpipolarLines =0,
+                 const double LAFcoef = 0,
+                 const cv::Scalar color1= cv::Scalar(255,0,0),
+                 const cv::Scalar color2= cv::Scalar(0,255,0));
 
 #endif //MODS_NEW_IO_MODS_H
